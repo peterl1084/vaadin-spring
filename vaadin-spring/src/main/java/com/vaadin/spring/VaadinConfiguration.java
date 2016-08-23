@@ -31,6 +31,8 @@ import com.vaadin.spring.internal.VaadinSessionScope;
 import com.vaadin.spring.internal.ViewCache;
 import com.vaadin.spring.internal.ViewScopeImpl;
 import com.vaadin.spring.navigator.SpringViewProvider;
+import com.vaadin.spring.viewmenu.ViewMenu;
+import com.vaadin.spring.viewmenu.ViewMenuLayout;
 
 /**
  * Spring configuration for registering the custom Vaadin scopes, the
@@ -76,6 +78,18 @@ BeanDefinitionRegistryPostProcessor {
     @com.vaadin.spring.annotation.UIScope
     ViewCache viewCache() {
         return new DefaultViewCache();
+    }
+    
+    @Bean
+    @com.vaadin.spring.annotation.UIScope
+    ViewMenuLayout viewMenuLayout() {
+    	return new ViewMenuLayout();
+    }
+    
+    @Bean
+    @com.vaadin.spring.annotation.UIScope
+    ViewMenu viewMenu() {
+    	return new ViewMenu();
     }
 
     @Override

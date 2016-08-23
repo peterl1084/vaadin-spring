@@ -30,38 +30,38 @@ import com.vaadin.ui.UI;
 
 public class UUIDTest {
 
-    @Test
-    public void testSameIdEquals() {
-        assertEquals(new UIID(1), new UIID(1));
-    }
+	@Test
+	public void testSameIdEquals() {
+		assertEquals(new UIID(1), new UIID(1));
+	}
 
-    @Test
-    public void testDifferentIdNotEquals() {
-        assertNotEquals(new UIID(1), new UIID(2));
-    }
+	@Test
+	public void testDifferentIdNotEquals() {
+		assertNotEquals(new UIID(1), new UIID(2));
+	}
 
-    @Test
-    public void testNullNotEquals() {
-        assertNotEquals(new UIID(1), null);
-    }
+	@Test
+	public void testNullNotEquals() {
+		assertNotEquals(new UIID(1), null);
+	}
 
-    @Test
-    public void testDifferentClassNotEquals() {
-        assertNotEquals(new UIID(1), new Integer(1));
-    }
+	@Test
+	public void testDifferentClassNotEquals() {
+		assertNotEquals(new UIID(1), new Integer(1));
+	}
 
-    @Test
-    public void testUIConstructor() {
-        final int expected_id = 123;
-        UI ui = mock(UI.class);
-        when(ui.getUIId()).thenReturn(expected_id);
-        UIID uiid = new UIID(ui);
-        verify(ui, atLeast(1)).getUIId();
-        assertEquals(new UIID(expected_id), uiid);
-    }
+	@Test
+	public void testUIConstructor() {
+		final int expected_id = 123;
+		UI ui = mock(UI.class);
+		when(ui.getUIId()).thenReturn(expected_id);
+		UIID uiid = new UIID(ui);
+		verify(ui, atLeast(1)).getUIId();
+		assertEquals(new UIID(expected_id), uiid);
+	}
 
-    @After
-    public void validate() {
-        Mockito.validateMockitoUsage();
-    }
+	@After
+	public void validate() {
+		Mockito.validateMockitoUsage();
+	}
 }

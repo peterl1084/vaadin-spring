@@ -32,108 +32,107 @@ import org.springframework.beans.factory.ObjectFactory;
 
 public class BeanStoreTest {
 
-    String beanName1 = "TestBean1";
-    String beanName2 = "TestBean2";
-    String beanStoreName = "TestBeanStore";
-    Object bean1 = new Object();
-    Object bean2 = new Object();
-    ObjectFactory<Object> objFactory1;
-    ObjectFactory<Object> objFactory2;
-    BeanStore beanStore = new BeanStore(beanStoreName);
+	String beanName1 = "TestBean1";
+	String beanName2 = "TestBean2";
+	String beanStoreName = "TestBeanStore";
+	Object bean1 = new Object();
+	Object bean2 = new Object();
+	ObjectFactory<Object> objFactory1;
+	ObjectFactory<Object> objFactory2;
+	BeanStore beanStore = new BeanStore(this.beanStoreName);
 
-    @SuppressWarnings("unchecked")
-    @Before
-    public void initBeanFactory() {
-        // Create dummy bean factories that return a simple bean
-        objFactory1 = mock(ObjectFactory.class);
-        when(objFactory1.getObject()).thenReturn(bean1);
-        objFactory2 = mock(ObjectFactory.class);
-        when(objFactory2.getObject()).thenReturn(bean2);
-    }
+	@SuppressWarnings("unchecked")
+	@Before
+	public void initBeanFactory() {
+		// Create dummy bean factories that return a simple bean
+		this.objFactory1 = mock(ObjectFactory.class);
+		when(this.objFactory1.getObject()).thenReturn(this.bean1);
+		this.objFactory2 = mock(ObjectFactory.class);
+		when(this.objFactory2.getObject()).thenReturn(this.bean2);
+	}
 
-    @Test
-    public void testCreateBean() {
-        assertSame(bean1, beanStore.create(beanName1, objFactory1));
-    }
+	@Test
+	public void testCreateBean() {
+		assertSame(this.bean1, this.beanStore.create(this.beanName1, this.objFactory1));
+	}
 
-    @Test
-    public void testGetBean() {
-        assertSame(bean1, beanStore.get(beanName1, objFactory1));
+	@Test
+	public void testGetBean() {
+		assertSame(this.bean1, this.beanStore.get(this.beanName1, this.objFactory1));
 
-        assertNotSame(bean2, beanStore.get(beanName1, objFactory1));
+		assertNotSame(this.bean2, this.beanStore.get(this.beanName1, this.objFactory1));
 
-        assertNotSame(bean1, beanStore.get(beanName2, objFactory2));
-    }
+		assertNotSame(this.bean1, this.beanStore.get(this.beanName2, this.objFactory2));
+	}
 
-    @Test
-    public void testGetConsistent() {
-        // Make sure the same name gives the same instance
-        assertSame(beanStore.get(beanName1, objFactory1),
-                beanStore.get(beanName1, objFactory1));
-    }
+	@Test
+	public void testGetConsistent() {
+		// Make sure the same name gives the same instance
+		assertSame(	this.beanStore.get(this.beanName1, this.objFactory1),
+					this.beanStore.get(this.beanName1, this.objFactory1));
+	}
 
-    @Test
-    public void testGetSameInstance() {
+	@Test
+	public void testGetSameInstance() {
 
-        // First time should at most create the factory once
-        beanStore.get(beanName1, objFactory1);
+		// First time should at most create the factory once
+		this.beanStore.get(this.beanName1, this.objFactory1);
 
-        // Make sure it will not be created more than once
-        beanStore.get(beanName1, objFactory1);
+		// Make sure it will not be created more than once
+		this.beanStore.get(this.beanName1, this.objFactory1);
 
-        verify(objFactory1, atMost(1)).getObject();
-    }
+		verify(this.objFactory1, atMost(1)).getObject();
+	}
 
-    @Test
-    public void testRemoveBean() {
-        // Make sure to create a new bean if not already there
-        beanStore.get(beanName1, objFactory1);
+	@Test
+	public void testRemoveBean() {
+		// Make sure to create a new bean if not already there
+		this.beanStore.get(this.beanName1, this.objFactory1);
 
-        // Make sure the bean is removed
-        assertSame(bean1, beanStore.remove(beanName1));
+		// Make sure the bean is removed
+		assertSame(this.bean1, this.beanStore.remove(this.beanName1));
 
-        // Make sure it's already removed
-        assertNull(beanStore.remove(beanName1));
-    }
+		// Make sure it's already removed
+		assertNull(this.beanStore.remove(this.beanName1));
+	}
 
-    @Test
-    public void testRegisterDestructionCallbackAndDestroy() {
+	@Test
+	public void testRegisterDestructionCallbackAndDestroy() {
 
-        Runnable destructionCallback = mock(Runnable.class);
+		Runnable destructionCallback = mock(Runnable.class);
 
-        beanStore.registerDestructionCallback(beanStoreName,
-                destructionCallback);
+		this.beanStore.registerDestructionCallback(this.beanStoreName, destructionCallback);
 
-        // If registered it will be destroyed
-        beanStore.destroy();
+		// If registered it will be destroyed
+		this.beanStore.destroy();
 
-        // Make sure destructionCallback won't run again
-        beanStore.destroy();
+		// Make sure destructionCallback won't run again
+		this.beanStore.destroy();
 
-        // Make sure destroy() ran the registered destructionCallback once
-        verify(destructionCallback).run();
-    }
+		// Make sure destroy() ran the registered destructionCallback once
+		verify(destructionCallback).run();
+	}
 
-    @Test
-    public void testDestroyClearStore() {
+	@Test
+	public void testDestroyClearStore() {
 
-        // Make sure to create a new bean if not already there
-        beanStore.get(beanName1, objFactory1);
+		// Make sure to create a new bean if not already there
+		this.beanStore.get(this.beanName1, this.objFactory1);
 
-        beanStore.destroy();
+		this.beanStore.destroy();
 
-        // The bean should not be there anymore
-        assertNull(beanStore.remove(beanName1));
-    }
+		// The bean should not be there anymore
+		assertNull(this.beanStore.remove(this.beanName1));
+	}
 
-    @Test
-    public void testToStringConsistent() {
-        // Make sure the format is always the same
-        assertEquals(beanStore.toString(), beanStore.toString());
-    }
+	@Test
+	public void testToStringConsistent() {
+		// Make sure the format is always the same
+		assertEquals(this.beanStore.toString(), this.beanStore.toString());
+	}
 
-    @After
-    public void validate() {
-        Mockito.validateMockitoUsage();
-    }
+	@After
+	public void validate() {
+		Mockito.validateMockitoUsage();
+	}
 }

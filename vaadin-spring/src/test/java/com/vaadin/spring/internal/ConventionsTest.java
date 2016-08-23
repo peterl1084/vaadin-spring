@@ -19,108 +19,107 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
-
 import com.vaadin.spring.annotation.SpringView;
 
 /**
  */
 public class ConventionsTest {
 
-    // static test classes
+	// static test classes
 
-    @SpringView
-    public static class SimpleView {
-    }
+	@SpringView
+	public static class SimpleView {
+	}
 
-    @SpringView
-    public static class SimpleViewWithoutViewName {
-    }
+	@SpringView
+	public static class SimpleViewWithoutViewName {
+	}
 
-    @SpringView(name = "simpleview")
-    public static class SimpleViewWithViewName {
-    }
+	@SpringView(name = "simpleview")
+	public static class SimpleViewWithViewName {
+	}
 
-    // test methods
+	// test methods
 
-    @Test
-    public void extractViewNameUsingPath() {
-        String expected = "simpleview";
-        String actual = deriveMappingForView(SimpleViewWithViewName.class);
-        assertThat(actual, is(expected));
-    }
+	@Test
+	public void extractViewNameUsingPath() {
+		String expected = "simpleview";
+		String actual = deriveMappingForView(SimpleViewWithViewName.class);
+		assertThat(actual, is(expected));
+	}
 
-    @Test
-    public void extractViewNameUsingConvention() {
-        String expected = "simple-view-without-view-name";
-        String actual = deriveMappingForView(SimpleViewWithoutViewName.class);
-        assertThat(actual, is(expected));
-    }
+	@Test
+	public void extractViewNameUsingConvention() {
+		String expected = "simple-view-without-view-name";
+		String actual = deriveMappingForView(SimpleViewWithoutViewName.class);
+		assertThat(actual, is(expected));
+	}
 
-    @Test
-    public void extractViewNameUsingConventionStrippingView() {
-        String expected = "simple";
-        String actual = deriveMappingForView(SimpleView.class);
-        assertThat(actual, is(expected));
-    }
+	@Test
+	public void extractViewNameUsingConventionStrippingView() {
+		String expected = "simple";
+		String actual = deriveMappingForView(SimpleView.class);
+		assertThat(actual, is(expected));
+	}
 
-    public String deriveMappingForView(Class<?> beanClass) {
-        SpringView annotation = beanClass.getAnnotation(SpringView.class);
-        return Conventions.deriveMappingForView(beanClass, annotation);
-    }
+	public String deriveMappingForView(Class<?> beanClass) {
+		SpringView annotation = beanClass.getAnnotation(SpringView.class);
+		return Conventions.deriveMappingForView(beanClass, annotation);
+	}
 
-    @Test
-    public void upperCamelCaseToLowerHyphenatedTest() {
-        String original = "AlphaBetaGamma";
-        String expected = "alpha-beta-gamma";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+	@Test
+	public void upperCamelCaseToLowerHyphenatedTest() {
+		String original = "AlphaBetaGamma";
+		String expected = "alpha-beta-gamma";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "alphaBetaGamma";
-        expected = "alpha-beta-gamma";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "alphaBetaGamma";
+		expected = "alpha-beta-gamma";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "";
-        expected = "";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "";
+		expected = "";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "a";
-        expected = "a";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "a";
+		expected = "a";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "A";
-        expected = "a";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "A";
+		expected = "a";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "ABC";
-        expected = "abc";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "ABC";
+		expected = "abc";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "alllowercase";
-        expected = "alllowercase";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "alllowercase";
+		expected = "alllowercase";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "main/sub";
-        expected = "main/sub";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "main/sub";
+		expected = "main/sub";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "MyCAPSTest";
-        expected = "my-caps-test";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "MyCAPSTest";
+		expected = "my-caps-test";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "MyATest";
-        expected = "my-a-test";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "MyATest";
+		expected = "my-a-test";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "aB";
-        expected = "a-b";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "aB";
+		expected = "a-b";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "Ab";
-        expected = "ab";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+		original = "Ab";
+		expected = "ab";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
 
-        original = "MyTEST";
-        expected = "my-test";
-        assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
-    }
+		original = "MyTEST";
+		expected = "my-test";
+		assertThat(Conventions.upperCamelToLowerHyphen(original), is(expected));
+	}
 
 }
