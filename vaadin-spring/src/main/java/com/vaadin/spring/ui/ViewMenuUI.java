@@ -1,7 +1,5 @@
 package com.vaadin.spring.ui;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.navigator.Navigator;
@@ -26,59 +24,60 @@ public class ViewMenuUI extends UI {
 	private static final long serialVersionUID = -3886173714848731454L;
 
 	@Autowired
-    private SpringViewProvider viewProvider;
+	private SpringViewProvider viewProvider;
 
 	@Autowired
-    protected ViewMenuLayout viewMenuLayout;
+	protected ViewMenuLayout viewMenuLayout;
 
-    @Override
-    protected void init(VaadinRequest request) {
-        Navigator navigator = new Navigator(this, viewMenuLayout.
-                getMainContent()) {
-					private static final long serialVersionUID = -1883036290735427155L;
+	@Override
+	protected void init(VaadinRequest request) {
+		Navigator navigator = new Navigator(this, this.viewMenuLayout.getMainContent()) {
+			private static final long serialVersionUID = -1883036290735427155L;
 
-					@Override
-                    public void navigateTo(String navigationState) {
-                        try {
-                        	super.navigateTo(navigationState);
-                        	viewMenuLayout.getViewMenu().navigateTo(navigationState);
-                        } catch (Exception e) {
-                            handleNavigationError(navigationState, e);
-                        }
-                    }
+			@Override
+			public void navigateTo(String navigationState) {
+				try {
+					super.navigateTo(navigationState);
+					ViewMenuUI.this.viewMenuLayout	.getViewMenu()
+													.navigateTo(navigationState);
+				} catch (Exception e) {
+					handleNavigationError(navigationState, e);
+				}
+			}
 
-                };
-        navigator.addProvider(viewProvider);
-        viewMenuLayout.init();
-        setContent(viewMenuLayout);
-    }
+		};
+		navigator.addProvider(this.viewProvider);
+		this.viewMenuLayout.init();
+		setContent(this.viewMenuLayout);
+	}
 
-    public ViewMenuLayout getViewMenuLayout() {
-        return viewMenuLayout;
-    }
+	public ViewMenuLayout getViewMenuLayout() {
+		return this.viewMenuLayout;
+	}
 
-    public CssLayout getContentLayout() {
-        return viewMenuLayout.getMainContent();
-    }
+	public CssLayout getContentLayout() {
+		return this.viewMenuLayout.getMainContent();
+	}
 
-    public static ViewMenu getMenu() {
-        return ((ViewMenuUI) UI.getCurrent()).getViewMenuLayout().getViewMenu();
-    }
+	public static ViewMenu getMenu() {
+		return ((ViewMenuUI) UI.getCurrent())	.getViewMenuLayout()
+												.getViewMenu();
+	}
 
-    /**
-     * Workaround for issue 1, related to vaadin issues: 13566, 14884
-     *
-     * @param navigationState the view id that was requested
-     * @param e the exception thrown by Navigator
-     */
-    protected void handleNavigationError(String navigationState, Exception e) {
-        Notification.show(
-                "The requested view (" + navigationState + ") was not available, "
-                + "entering default screen.", Notification.Type.WARNING_MESSAGE);
-        if (navigationState != null && !navigationState.isEmpty()) {
-            getNavigator().navigateTo(viewProvider.getDefaultViewId());
-        }
-        getSession().getErrorHandler().error(new com.vaadin.server.ErrorEvent(e));
-    }
+	/**
+	 * Workaround for issue 1, related to vaadin issues: 13566, 14884
+	 *
+	 * @param navigationState
+	 *            the view id that was requested
+	 * @param e
+	 *            the exception thrown by Navigator
+	 */
+	protected void handleNavigationError(String navigationState, Exception e) {
+		Notification.show("The requested view (" + navigationState + ") was not available, "
+				+ "entering default screen.", Notification.Type.WARNING_MESSAGE);
+		getNavigator().navigateTo(this.viewProvider.getDefaultViewId());
+		getSession().getErrorHandler()
+					.error(new com.vaadin.server.ErrorEvent(e));
+	}
 
 }
