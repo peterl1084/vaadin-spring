@@ -47,67 +47,62 @@ import com.vaadin.spring.viewmenu.ViewMenuLayout;
  * @author Gert-Jan Timmer (gjr.timmer@gmail.com)
  */
 @Configuration
-public class VaadinConfiguration implements ApplicationContextAware,
-BeanDefinitionRegistryPostProcessor {
+public class VaadinConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
 
-    private ApplicationContext applicationContext;
-    private BeanDefinitionRegistry beanDefinitionRegistry;
+	private ApplicationContext applicationContext;
+	private BeanDefinitionRegistry beanDefinitionRegistry;
 
-    @Bean
-    static VaadinSessionScope vaadinSessionScope() {
-        return new VaadinSessionScope();
-    }
+	@Bean
+	static VaadinSessionScope vaadinSessionScope() {
+		return new VaadinSessionScope();
+	}
 
-    @Bean
-    static UIScopeImpl uIScope() {
-        return new UIScopeImpl();
-    }
+	@Bean
+	static UIScopeImpl uIScope() {
+		return new UIScopeImpl();
+	}
 
-    @Bean
-    static ViewScopeImpl viewScope() {
-        return new ViewScopeImpl();
-    }
+	@Bean
+	static ViewScopeImpl viewScope() {
+		return new ViewScopeImpl();
+	}
 
-    @Bean
-    SpringViewProvider viewProvider() {
-        return new SpringViewProvider(applicationContext,
-                beanDefinitionRegistry);
-    }
+	@Bean
+	SpringViewProvider viewProvider() {
+		return new SpringViewProvider(this.applicationContext, this.beanDefinitionRegistry);
+	}
 
-    @Bean
-    @com.vaadin.spring.annotation.UIScope
-    ViewCache viewCache() {
-        return new DefaultViewCache();
-    }
-    
-    @Bean
-    @com.vaadin.spring.annotation.UIScope
-    ViewMenuLayout viewMenuLayout() {
-    	return new ViewMenuLayout();
-    }
-    
-    @Bean
-    @com.vaadin.spring.annotation.UIScope
-    ViewMenu viewMenu() {
-    	return new ViewMenu();
-    }
+	@Bean
+	@com.vaadin.spring.annotation.UIScope
+	ViewCache viewCache() {
+		return new DefaultViewCache();
+	}
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext)
-            throws BeansException {
-        this.applicationContext = applicationContext;
-    }
+	@Bean
+	@com.vaadin.spring.annotation.UIScope
+	ViewMenuLayout viewMenuLayout() {
+		return new ViewMenuLayout();
+	}
 
-    @Override
-    public void postProcessBeanDefinitionRegistry(
-            BeanDefinitionRegistry registry) throws BeansException {
-        beanDefinitionRegistry = registry;
-    }
+	@Bean
+	@com.vaadin.spring.annotation.UIScope
+	ViewMenu viewMenu() {
+		return new ViewMenu();
+	}
 
-    @Override
-    public void postProcessBeanFactory(
-            ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        // NOP
-    }
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
+
+	@Override
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
+		this.beanDefinitionRegistry = registry;
+	}
+
+	@Override
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		// NOP
+	}
 
 }

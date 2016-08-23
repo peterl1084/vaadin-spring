@@ -1,7 +1,5 @@
 package com.vaadin.spring.ui;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.navigator.Navigator;

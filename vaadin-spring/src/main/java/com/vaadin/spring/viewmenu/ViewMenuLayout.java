@@ -18,6 +18,7 @@ public class ViewMenuLayout extends HorizontalLayout {
 
 	@Autowired
 	ViewMenu viewMenu;
+
 	CssLayout content = new CssLayout();
 
 	/**
