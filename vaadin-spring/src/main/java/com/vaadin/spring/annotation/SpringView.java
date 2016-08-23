@@ -19,6 +19,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import com.vaadin.server.FontAwesome;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.UI;
 
@@ -90,4 +91,35 @@ public @interface SpringView {
      * subclass (or subclasses) that the view belongs to.
      */
     Class<? extends UI>[] ui() default {};
+    
+	/**
+	 * The name of the parent view if this module is a sub view. Default value
+	 * is "" when top level view.
+	 * 
+	 * @return the parent view name
+	 */
+    String parentName() default "";
+
+	/**
+	 * The icon of the view.
+	 * 
+	 * @return the icon of the view
+	 */
+	FontAwesome icon() default FontAwesome.FILE;
+	
+	/**
+	 * The order number of the view. All views on the same level/parent
+	 * will be ordered ascending by this number.
+	 * Default is -1 meaning unsorted
+	 * 
+	 * @return the sorting number
+	 */
+	public int order() default -1;
+	
+	/**
+	 * 
+	 * 
+	 * @return is default screen
+	 */
+	public boolean isDefault() default false;
 }

@@ -33,23 +33,22 @@ import com.vaadin.spring.internal.VaadinSpringComponentFactory;
 import com.vaadin.spring.internal.ViewCache;
 import com.vaadin.spring.internal.ViewScopeImpl;
 import com.vaadin.spring.navigator.SpringViewProvider;
+import com.vaadin.spring.viewmenu.ViewMenu;
+import com.vaadin.spring.viewmenu.ViewMenuLayout;
 import com.vaadin.ui.declarative.Design;
 
 /**
- * Spring configuration for registering the custom Vaadin scopes, the
- * {@link SpringViewProvider view provider} and some other stuff.
+ * Spring configuration for registering the custom Vaadin scopes, the {@link SpringViewProvider view provider} and some other stuff.
  *
- * Instead of using this class directly, it is recommended to add the
- * {@link EnableVaadin} annotation to a configuration class to automatically
- * import {@link VaadinConfiguration}.
+ * Instead of using this class directly, it is recommended to add the {@link EnableVaadin} annotation to a configuration class to automatically import
+ * {@link VaadinConfiguration}.
  *
  * @author Josh Long (josh@joshlong.com)
  * @author Petter Holmström (petter@vaadin.com)
  * @author Gert-Jan Timmer (gjr.timmer@gmail.com)
  */
 @Configuration
-public class VaadinConfiguration implements ApplicationContextAware,
-        BeanDefinitionRegistryPostProcessor {
+public class VaadinConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
 
     private ApplicationContext applicationContext;
     private BeanDefinitionRegistry beanDefinitionRegistry;
@@ -72,8 +71,7 @@ public class VaadinConfiguration implements ApplicationContextAware,
     @Bean
     @UIScope
     SpringViewProvider viewProvider() {
-        return new SpringViewProvider(applicationContext,
-                beanDefinitionRegistry);
+        return new SpringViewProvider(this.applicationContext, this.beanDefinitionRegistry);
     }
 
     @Bean
@@ -83,28 +81,36 @@ public class VaadinConfiguration implements ApplicationContextAware,
     }
 
     @Bean
+    @com.vaadin.spring.annotation.UIScope
+    ViewMenuLayout viewMenuLayout() {
+        return new ViewMenuLayout();
+    }
+
+    @Bean
+    @com.vaadin.spring.annotation.UIScope
+    ViewMenu viewMenu() {
+        return new ViewMenu();
+    }
+
+    @Bean
     VaadinSpringComponentFactory componentFactory() {
         return new VaadinSpringComponentFactory();
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext)
-            throws BeansException {
+    public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
     @Override
-    public void postProcessBeanDefinitionRegistry(
-            BeanDefinitionRegistry registry) throws BeansException {
-        beanDefinitionRegistry = registry;
+    public void postProcessBeanDefinitionRegistry(final BeanDefinitionRegistry registry) throws BeansException {
+        this.beanDefinitionRegistry = registry;
     }
 
     @Override
-    public void postProcessBeanFactory(
-            ConfigurableListableBeanFactory beanFactory) throws BeansException {
+    public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
 
-        VaadinSpringComponentFactory componentFactory = beanFactory
-                .getBean(VaadinSpringComponentFactory.class);
+        final VaadinSpringComponentFactory componentFactory = beanFactory.getBean(VaadinSpringComponentFactory.class);
         Design.setComponentFactory(componentFactory);
     }
 

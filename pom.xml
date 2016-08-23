@@ -194,16 +194,18 @@
         <module>vaadin-spring-boot</module>
         <module>vaadin-spring-boot-starter</module>
     </modules>
-    <repositories>
-        <repository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+    
+    <distributionManagement>
+		<repository>
+			<id>bp_artifactory</id>
+			<name>bp_artifactory-releases</name>
+			<url>http://digistyle.bonprix.net/artifactory/libs-release-local</url>
+		</repository>
+		<snapshotRepository>
+			<id>bp_artifactory</id>
+			<name>bp_artifactory-snapshots</name>
+        	<url>http://digistyle.bonprix.net/artifactory/libs-snapshot-local</url>
+    	</snapshotRepository>
+	</distributionManagement>
+
 </project>
