@@ -15,7 +15,12 @@
  */
 package com.vaadin.spring.navigator;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -85,13 +90,45 @@ public class SpringViewProvider implements ViewProvider {
 
     // We can have multiple views with the same view name, as long as they
     // belong to different UI subclasses
+    private final Set<String> defaultViewNames = new ConcurrentSkipListSet<String>();
+    private final Set<String> rootViewNames = new ConcurrentSkipListSet<String>();
     private final Map<String, Set<String>> viewNameToBeanNamesMap = new ConcurrentHashMap<String, Set<String>>();
+    private final Map<String, Set<String>> viewNameParentToViewNameChildsMap = new ConcurrentHashMap<String, Set<String>>();
     private final ApplicationContext applicationContext;
     private final BeanDefinitionRegistry beanDefinitionRegistry;
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SpringViewProvider.class);
 
     private Class<? extends View> accessDeniedViewClass;
+
+	private Comparator<? super String> orderComparator = new Comparator<String>() {
+
+		@Override
+		public int compare(String beanName1, String beanName2) {
+			final SpringView annotation1 = getAnnotationOfBeanName(beanName1);
+			final SpringView annotation2 = getAnnotationOfBeanName(beanName2);
+		  
+			if (annotation1.order() == -1 && annotation2.order() == -1) {
+				// alphabetical sorting
+				Class<?> viewClass1 = getTypeOfBeanName(beanName1);
+				Class<?> viewClass2 = getTypeOfBeanName(beanName2);
+				String viewName1 = SpringView.USE_CONVENTIONS.equals(annotation1.name()) ? Conventions.deriveMappingForView(viewClass1, annotation1) : annotation1.name();
+				String viewName2 = SpringView.USE_CONVENTIONS.equals(annotation2.name()) ? Conventions.deriveMappingForView(viewClass2, annotation2) : annotation2.name();
+				
+				return viewName1.compareToIgnoreCase(viewName2);
+			}
+			
+			if (annotation1.order() == -1) {
+				return -1;
+			}
+			
+			if (annotation2.order() == -1) {
+				return 1;
+			}
+			
+			return annotation2.order() - annotation1.order();
+		}
+	};
 
     @Autowired
     public SpringViewProvider(ApplicationContext applicationContext,
@@ -151,8 +188,30 @@ public class SpringViewProvider implements ViewProvider {
                 if (beanNames == null) {
                     beanNames = new ConcurrentSkipListSet<String>();
                     viewNameToBeanNamesMap.put(viewName, beanNames);
+                } 
+                if (!isViewNameUniqueForUIs(beanName, beanNames)) {
+                	 throw new IllegalStateException("SpringView name ["
+                             + viewName + "] is not unique for UIs, already registered " + beanNames);
                 }
                 beanNames.add(beanName);
+                final String parentName = annotation.parentName();
+                if (parentName.isEmpty()) {
+                	rootViewNames.add(viewName);
+                } else {
+                	Set<String> childViewNames = viewNameParentToViewNameChildsMap.get(parentName);
+                    if (childViewNames == null) {
+                    	childViewNames = new ConcurrentSkipListSet<String>();
+                    	viewNameParentToViewNameChildsMap.put(parentName, childViewNames);
+                    }
+                    childViewNames.add(viewName);
+                }
+                if (annotation.isDefault()) {
+                	if (!isDefaultViewNameUniqueForUIs(beanName)) {
+                		throw new IllegalStateException("SpringView default ["
+                                + viewName + "] is not unique for UIs, already default " + this.defaultViewNames);
+                	}
+                	defaultViewNames.add(viewName);
+                }
                 count++;
             } else {
                 LOGGER.error("The view bean [{}] does not implement View",
@@ -254,6 +313,75 @@ public class SpringViewProvider implements ViewProvider {
             return false;
         }
     }
+    
+    private boolean isViewNameUniqueForUIs(String beanName, Set<String> alreadRegistedBeanNamesForViewName) {
+    	if (alreadRegistedBeanNamesForViewName.size() == 0) {
+    		return true;
+    	}
+    	
+        final Class<?> type = applicationContext.getType(beanName);
+
+        Assert.isAssignable(View.class, type,
+                "bean did not implement View interface");
+
+        final SpringView annotation = applicationContext
+                .findAnnotationOnBean(beanName, SpringView.class);
+
+        Assert.notNull(annotation,
+                "class did not have a SpringView annotation");
+
+        if (annotation.ui().length == 0) {
+        	LOGGER.error(
+                    "View class [{}] with view name [{}] is available for all UI subclasses, but has other available beanNames [{}]",
+                    type.getCanonicalName(),
+                    getViewNameFromAnnotation(type, annotation),
+                    alreadRegistedBeanNamesForViewName);
+            return false;
+        } 
+        
+        for (Class<? extends UI> beanNameUI : annotation.ui()) {
+            for (String alreadyRegisteredBeanName : alreadRegistedBeanNamesForViewName) {
+            	final SpringView alreadyRegisteredAnnotation = applicationContext
+                        .findAnnotationOnBean(alreadyRegisteredBeanName, SpringView.class);
+            	
+            	for (Class<? extends UI> alreadyRegisteredBeanNameUI : alreadyRegisteredAnnotation.ui()) {
+					if (alreadyRegisteredBeanNameUI.equals(beanNameUI)) {
+						return false;
+					}
+				}
+			}
+        }
+
+        return true;
+    }
+    
+    private boolean isDefaultViewNameUniqueForUIs(String beanName) {
+    	if (this.defaultViewNames.size() == 0) {
+    		return true;
+    	}
+    	
+    	final SpringView annotation = applicationContext
+				.findAnnotationOnBean(beanName, SpringView.class);
+
+        if (annotation.ui().length == 0) {
+            return false;
+        } 
+        
+        for (Class<? extends UI> beanNameUI : annotation.ui()) {
+            for (String defaultViewName : this.defaultViewNames) {
+            	final SpringView defaultViewNameAnnotation = applicationContext
+                        .findAnnotationOnBean(getBeanNameOfViewName(defaultViewName), SpringView.class);
+            	
+            	for (Class<? extends UI> defaultViewNameUI : defaultViewNameAnnotation.ui()) {
+					if (defaultViewNameUI.equals(beanNameUI)) {
+						return false;
+					}
+				}
+			}
+        }
+
+        return true;
+    }
 
     private Class<? extends UI> getValidUIClass(UI currentUI,
             Class<? extends UI>[] validUIClasses) {
@@ -354,4 +482,87 @@ public class SpringViewProvider implements ViewProvider {
         }
         return true;
     }
+    
+    public Class<?> getTypeOfBeanName(String beanName) {
+    	return applicationContext.getType(beanName);
+    }
+    
+    public SpringView getAnnotationOfBeanName(String beanName) {
+    	return applicationContext.findAnnotationOnBean(beanName, SpringView.class);
+    }
+
+	public List<String> getRootBeanNames() {
+		List<String> rootBeanNames = new ArrayList<String>();
+		
+		for (String rootViewName : this.rootViewNames) {
+			for (String beanName : this.viewNameToBeanNamesMap.get(rootViewName)) {
+				if (isViewBeanNameValidForCurrentUI(beanName)) {
+					rootBeanNames.add(beanName);
+				}
+			}
+		}
+		
+		rootBeanNames.sort(orderComparator);
+		
+		return rootBeanNames;
+	}
+
+	public List<String> getChildBeanNames(String viewId) {
+		List<String> childBeanNames = new ArrayList<String>();
+
+		Set<String> viewNames = viewNameParentToViewNameChildsMap.get(viewId);
+		if (viewNames != null) {
+			for (String viewName : viewNameParentToViewNameChildsMap.get(viewId)) {
+				for (String beanName : this.viewNameToBeanNamesMap.get(viewName)) {
+					if (isViewBeanNameValidForCurrentUI(beanName)) {
+						childBeanNames.add(beanName);
+					}
+				}
+			}
+		}
+		
+		childBeanNames.sort(orderComparator );
+		
+		return childBeanNames;
+	}
+
+	public String getParentViewName(String viewId) {
+		Iterator<Entry<String, Set<String>>> iterator = viewNameParentToViewNameChildsMap.entrySet().iterator();
+		while (iterator.hasNext()) {
+			Entry<String, Set<String>> parentEntry = iterator.next();
+			if (parentEntry.getValue().contains(viewId)) {
+				return parentEntry.getKey();
+			}
+		}
+		return "";
+	}
+
+	public String getBeanNameOfViewName(String viewName) {
+		Set<String> beanNames = this.viewNameToBeanNamesMap.get(viewName);
+		
+		if (beanNames == null) {
+			return null;
+		}
+		
+		for (String beanName : beanNames) {
+			if (isViewBeanNameValidForCurrentUI(beanName)) {
+				return beanName;
+			}
+		}
+		
+		return null;
+	}
+	
+	public void setOrderComparator(Comparator<? super String> orderComparator) {
+		this.orderComparator = orderComparator;
+	}
+
+	public String getDefaultViewId() {
+		for (String viewName : defaultViewNames) {
+			if (isViewNameValidForCurrentUI(viewName)) {
+				return viewName;
+			}
+		}
+		return null;
+	}
 }
