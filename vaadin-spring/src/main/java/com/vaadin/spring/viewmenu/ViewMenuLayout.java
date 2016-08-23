@@ -15,46 +15,47 @@ import com.vaadin.ui.HorizontalLayout;
 @UIScope
 public class ViewMenuLayout extends HorizontalLayout {
 	private static final long serialVersionUID = -1785464973401661421L;
-	
+
 	@Autowired
-    ViewMenu viewMenu;
-    CssLayout content = new CssLayout();
+	ViewMenu viewMenu;
 
-    /**
-     * @return the layout to be used for the main content.
-     */
-    public CssLayout getMainContent() {
-        return content;
-    }
+	CssLayout content = new CssLayout();
 
-//    @PostConstruct
-    public void init() {    	
-        setSpacing(false);
-        setSizeFull();
-        /* We are using some CSS magic built into Valo theme
-         * for reponsive menu. This adds hints necessary for some
-         * supported browsers.
-         */
-        content.setPrimaryStyleName("valo-content");
-        content.addStyleName("v-scrollable");
-        content.setSizeFull();
-        addComponents(viewMenu, content);
-        setExpandRatio(content, 1);
-        content.setWidth(100, Unit.PERCENTAGE);
-            
-        addAttachListener(new AttachListener() {
+	/**
+	 * @return the layout to be used for the main content.
+	 */
+	public CssLayout getMainContent() {
+		return this.content;
+	}
+
+	// @PostConstruct
+	public void init() {
+		setSpacing(false);
+		setSizeFull();
+		/*
+		 * We are using some CSS magic built into Valo theme for reponsive menu.
+		 * This adds hints necessary for some supported browsers.
+		 */
+		this.content.setPrimaryStyleName("valo-content");
+		this.content.addStyleName("v-scrollable");
+		this.content.setSizeFull();
+		addComponents(this.viewMenu, this.content);
+		setExpandRatio(this.content, 1);
+		this.content.setWidth(100, Unit.PERCENTAGE);
+
+		addAttachListener(new AttachListener() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-            public void attach(AttachEvent event) {
-                Responsive.makeResponsive(getUI());
-            }
-        });
-        
-        viewMenu.init();
-    }
+			public void attach(AttachEvent event) {
+				Responsive.makeResponsive(getUI());
+			}
+		});
 
-    public ViewMenu getViewMenu() {
-        return viewMenu;
-    }
+		this.viewMenu.init();
+	}
+
+	public ViewMenu getViewMenu() {
+		return this.viewMenu;
+	}
 }
