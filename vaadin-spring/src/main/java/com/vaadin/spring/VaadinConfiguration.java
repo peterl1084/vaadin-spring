@@ -33,8 +33,7 @@ import com.vaadin.spring.internal.VaadinSpringComponentFactory;
 import com.vaadin.spring.internal.ViewCache;
 import com.vaadin.spring.internal.ViewScopeImpl;
 import com.vaadin.spring.navigator.SpringViewProvider;
-import com.vaadin.spring.viewmenu.ViewMenu;
-import com.vaadin.spring.viewmenu.ViewMenuLayout;
+
 import com.vaadin.ui.declarative.Design;
 
 /**
@@ -78,18 +77,6 @@ public class VaadinConfiguration implements ApplicationContextAware, BeanDefinit
     @com.vaadin.spring.annotation.UIScope
     ViewCache viewCache() {
         return new DefaultViewCache();
-    }
-
-    @Bean
-    @com.vaadin.spring.annotation.UIScope
-    ViewMenuLayout viewMenuLayout() {
-        return new ViewMenuLayout();
-    }
-
-    @Bean
-    @com.vaadin.spring.annotation.UIScope
-    ViewMenu viewMenu() {
-        return new ViewMenu();
     }
 
     @Bean
