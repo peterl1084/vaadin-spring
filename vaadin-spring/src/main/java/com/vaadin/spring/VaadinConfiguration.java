@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The original authors
+ * Copyright 2015-2016 The original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.vaadin.spring.annotation.EnableVaadin;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.internal.DefaultViewCache;
 import com.vaadin.spring.internal.UIScopeImpl;
 import com.vaadin.spring.internal.VaadinSessionScope;
@@ -48,7 +49,7 @@ import com.vaadin.spring.viewmenu.ViewMenuLayout;
  */
 @Configuration
 public class VaadinConfiguration implements ApplicationContextAware,
-BeanDefinitionRegistryPostProcessor {
+        BeanDefinitionRegistryPostProcessor {
 
     private ApplicationContext applicationContext;
     private BeanDefinitionRegistry beanDefinitionRegistry;
@@ -69,6 +70,7 @@ BeanDefinitionRegistryPostProcessor {
     }
 
     @Bean
+    @UIScope
     SpringViewProvider viewProvider() {
         return new SpringViewProvider(applicationContext,
                 beanDefinitionRegistry);

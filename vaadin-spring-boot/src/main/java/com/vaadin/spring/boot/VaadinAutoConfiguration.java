@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The original authors
+ * Copyright 2015-2016 The original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.vaadin.spring.annotation.EnableVaadin;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.boot.annotation.EnableVaadinServlet;
+import com.vaadin.spring.internal.SpringViewDisplayPostProcessor;
+import com.vaadin.spring.navigator.SpringNavigator;
 
 /**
  * @author Petter Holmström (petter@vaadin.com)
@@ -46,6 +51,42 @@ public class VaadinAutoConfiguration {
             logger.debug("{} initialized", getClass().getName());
         }
     }
+
+    @Configuration
+    // not using @EnableVaadinNavigation to enable each bean to have its own
+    // condition
+    static class EnableVaadinNavigatorConfiguration
+            implements InitializingBean {
+
+        @Bean
+        public static SpringViewDisplayPostProcessor springViewDisplayPostProcessor() {
+            return new SpringViewDisplayPostProcessor();
+        }
+
+        @Override
+        public void afterPropertiesSet() throws Exception {
+            logger.debug("{} initialized", getClass().getName());
+        }
+    }
+
+	@Configuration
+	@ConditionalOnClass(name = "com.vaadin.spring.navigator.SpringNavigator")
+	static class EnableSpringVaadinNavigatorConfiguration
+			implements InitializingBean {
+
+		@ConditionalOnMissingBean(type = "com.vaadin.spring.navigator.SpringNavigator")
+		@Bean
+		@UIScope
+		public SpringNavigator vaadinNavigator() {
+			return new SpringNavigator();
+		}
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			logger.debug("{} initialized", getClass().getName());
+		}
+
+	}
 
     @Configuration
     @EnableVaadinServlet

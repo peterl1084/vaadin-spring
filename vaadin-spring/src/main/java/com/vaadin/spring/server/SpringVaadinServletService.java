@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 The original authors
+ * Copyright 2015-2016 The original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 package com.vaadin.spring.server;
 
 import java.util.List;
+
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.RequestHandler;
@@ -72,4 +75,12 @@ public class SpringVaadinServletService extends VaadinServletService {
         return handlers;
     }
 
+    /**
+     * Find the Spring web application context related to the servlet context.
+     *
+     */
+    public WebApplicationContext getWebApplicationContext() {
+        return WebApplicationContextUtils
+                .getWebApplicationContext(getServlet().getServletContext());
+    }
 }
