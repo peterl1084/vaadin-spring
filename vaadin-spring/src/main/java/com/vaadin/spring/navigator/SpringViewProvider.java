@@ -15,12 +15,12 @@
  */
 package com.vaadin.spring.navigator;
 
-import java.util.Comparator;
-import java.util.Iterator;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -93,37 +93,37 @@ import com.vaadin.ui.UI;
 public class SpringViewProvider implements ViewProvider {
 
 	private static final long serialVersionUID = 6906237177564157222L;
-	
+
 	/**
-     * Internal class used to communicate info on available views within the
-     * view provider.
-     */
-    protected static class ViewInfo implements Serializable {
-        private final String viewName;
-        private final String beanName;
+	 * Internal class used to communicate info on available views within the
+	 * view provider.
+	 */
+	public static class ViewInfo implements Serializable {
+		private final String viewName;
+		private final String beanName;
 
-        public ViewInfo(String viewName, String beanName) {
-            this.viewName = viewName;
-            this.beanName = beanName;
-        }
+		public ViewInfo(String viewName, String beanName) {
+			this.viewName = viewName;
+			this.beanName = beanName;
+		}
 
-        public String getViewName() {
-            return viewName;
-        }
+		public String getViewName() {
+			return this.viewName;
+		}
 
-        public String getBeanName() {
-            return beanName;
-        }
-    }
+		public String getBeanName() {
+			return this.beanName;
+		}
+	}
 
-    /*
-     * Note! This is should be a singleton bean but it is probably not if you
-     * serialize and deserialize a VaadinSession.
-     *
-     * This should be fixed so that SpringViewProvider is not a singleton bean
-     * but is UIScoped. This should also remove the need for using
-     * UI.getCurrent().
-     */
+	/*
+	 * Note! This is should be a singleton bean but it is probably not if you
+	 * serialize and deserialize a VaadinSession.
+	 *
+	 * This should be fixed so that SpringViewProvider is not a singleton bean
+	 * but is UIScoped. This should also remove the need for using
+	 * UI.getCurrent().
+	 */
 
 	// We can have multiple views with the same view name, as long as they
 	// belong to different UI subclasses
@@ -131,23 +131,25 @@ public class SpringViewProvider implements ViewProvider {
 	private final Set<String> rootViewNames = new ConcurrentSkipListSet<String>();
 	private final Map<String, Set<String>> viewNameToBeanNamesMap = new ConcurrentHashMap<String, Set<String>>();
 	private final Map<String, Set<String>> viewNameParentToViewNameChildsMap = new ConcurrentHashMap<String, Set<String>>();
-	private final ApplicationContext applicationContext;
-	private final BeanDefinitionRegistry beanDefinitionRegistry;
+	private transient BeanDefinitionRegistry beanDefinitionRegistry;
+	private transient ApplicationContext applicationContext;
 	private static final Logger LOGGER = LoggerFactory.getLogger(SpringViewProvider.class);
 
 	private Class<? extends View> accessDeniedViewClass;
 
-	private Comparator<? super String> orderComparator = new Comparator<String>() {
+	private Comparator<ViewInfo> orderComparator = new Comparator<ViewInfo>() {
 
 		@Override
-		public int compare(String beanName1, String beanName2) {
-			final SpringView annotation1 = getAnnotationOfBeanName(beanName1);
-			final SpringView annotation2 = getAnnotationOfBeanName(beanName2);
+		public int compare(ViewInfo viewInfo1, ViewInfo viewInfo2) {
+			final SpringView annotation1 = getWebApplicationContext().findAnnotationOnBean(	viewInfo1.getBeanName(),
+																							SpringView.class);
+			final SpringView annotation2 = getWebApplicationContext().findAnnotationOnBean(	viewInfo2.getBeanName(),
+																							SpringView.class);
 
 			if (annotation1.order() == -1 && annotation2.order() == -1) {
 				// alphabetical sorting
-				Class<?> viewClass1 = getTypeOfBeanName(beanName1);
-				Class<?> viewClass2 = getTypeOfBeanName(beanName2);
+				Class<?> viewClass1 = getWebApplicationContext().getType(viewInfo1.getBeanName());
+				Class<?> viewClass2 = getWebApplicationContext().getType(viewInfo2.getBeanName());
 				String viewName1 = SpringView.USE_CONVENTIONS.equals(annotation1.name())
 						? Conventions.deriveMappingForView(viewClass1, annotation1) : annotation1.name();
 				String viewName2 = SpringView.USE_CONVENTIONS.equals(annotation2.name())
@@ -205,20 +207,21 @@ public class SpringViewProvider implements ViewProvider {
 	void init() {
 		LOGGER.info("Looking up SpringViews");
 		int count = 0;
-		final String[] viewBeanNames = this.applicationContext.getBeanNamesForAnnotation(SpringView.class);
+		final String[] viewBeanNames = getWebApplicationContext().getBeanNamesForAnnotation(SpringView.class);
 		for (String beanName : viewBeanNames) {
-			final Class<?> type = this.applicationContext.getType(beanName);
+			final Class<?> type = getWebApplicationContext().getType(beanName);
 			if (View.class.isAssignableFrom(type)) {
-				final SpringView annotation = this.applicationContext.findAnnotationOnBean(beanName, SpringView.class);
+				final SpringView annotation = getWebApplicationContext().findAnnotationOnBean(	beanName,
+																								SpringView.class);
 				final String viewName = getViewNameFromAnnotation(type, annotation);
 				LOGGER.debug("Found SpringView bean [{}] with view name [{}]", beanName, viewName);
-				if (this.applicationContext.isSingleton(beanName)) {
+				if (getWebApplicationContext().isSingleton(beanName)) {
 					throw new IllegalStateException("SpringView bean [" + beanName + "] must not be a singleton");
 				}
-				Set<String> beanNames = this.viewNameToBeanNamesMap.get(viewName);
+				Set<String> beanNames = getViewNameToBeanNamesMap().get(viewName);
 				if (beanNames == null) {
 					beanNames = new ConcurrentSkipListSet<String>();
-					this.viewNameToBeanNamesMap.put(viewName, beanNames);
+					getViewNameToBeanNamesMap().put(viewName, beanNames);
 				}
 				if (!isViewNameUniqueForUIs(beanName, beanNames)) {
 					throw new IllegalStateException("SpringView name [" + viewName
@@ -258,232 +261,213 @@ public class SpringViewProvider implements ViewProvider {
 		}
 	}
 
-	protected String getViewNameFromAnnotation(Class<?> beanClass,
-            SpringView annotation) {
-        String viewName = Conventions.deriveMappingForView(beanClass, annotation);
-        return getWebApplicationContext().getEnvironment().resolvePlaceholders(viewName);
-    }
-	
+	protected String getViewNameFromAnnotation(Class<?> beanClass, SpringView annotation) {
+		String viewName = Conventions.deriveMappingForView(beanClass, annotation);
+		return getWebApplicationContext()	.getEnvironment()
+											.resolvePlaceholders(viewName);
+	}
+
 	/**
-     * Return a collection with all the registered Spring views for the current
-     * UI regardless of access restrictions.
-     *
-     * @return list of ViewInfo, not null
-     */
-    protected List<ViewInfo> getAllViewsForCurrentUI() {
-        List<ViewInfo> views = new ArrayList<ViewInfo>();
-        for (String viewName : getViewNameToBeanNamesMap().keySet()) {
-            for (String beanName : getViewNameToBeanNamesMap().get(viewName)) {
-                ViewInfo viewInfo = new ViewInfo(viewName, beanName);
-                if (isViewValidForCurrentUI(viewInfo)) {
-                    views.add(viewInfo);
-                }
-            }
-        }
-        return views;
-    }
-    
-    /**
-     * Return a collection with all the registered Spring views for the current
-     * UI which the current user is allowed to access. Note that only view
-     * type/bean level access is checked ({@link ViewAccessControl}), and view
-     * instance specific checks ({@link ViewInstanceAccessControl}) are not
-     * applied.
-     *
-     * @return list of ViewInfo, not null
-     */
-    protected List<ViewInfo> getAllowedViewsForCurrentUI() {
-        List<ViewInfo> views = new ArrayList<ViewInfo>();
-        for (ViewInfo view : getAllViewsForCurrentUI()) {
-            if (isAccessGranted(view)) {
-                views.add(view);
-            }
-        }
-        return views;
-    }
-    
-    /**
-     * Return a collection with all the registered Spring views with the given
-     * view name for the current UI and which the current user is allowed to
-     * access. Note that only view type/bean level access is checked
-     * ({@link ViewAccessControl}), and view instance specific checks
-     * ({@link ViewInstanceAccessControl}) are not applied.
-     *
-     * @param viewName
-     *            view name in the form returned by {@link #getViewName(String)}
-     *            (no parameters)
-     * @return list of ViewInfo, not null
-     */
-    protected List<ViewInfo> getAllowedViewsForCurrentUI(String viewName) {
-        List<ViewInfo> views = new ArrayList<ViewInfo>();
-        Set<String> allViews = getViewNameToBeanNamesMap().get(viewName);
-        if (allViews != null) {
-            for (String beanName : allViews) {
-                ViewInfo viewInfo = new ViewInfo(viewName, beanName);
-                if (isViewValidForCurrentUI(viewInfo)
-                        && isAccessGranted(viewInfo)) {
-                    views.add(viewInfo);
-                }
-            }
-        }
-        return views;
-    }
+	 * Return a collection with all the registered Spring views for the current
+	 * UI regardless of access restrictions.
+	 *
+	 * @return list of ViewInfo, not null
+	 */
+	protected List<ViewInfo> getAllViewsForCurrentUI() {
+		List<ViewInfo> views = new ArrayList<ViewInfo>();
+		for (String viewName : getViewNameToBeanNamesMap().keySet()) {
+			for (String beanName : getViewNameToBeanNamesMap().get(viewName)) {
+				ViewInfo viewInfo = new ViewInfo(viewName, beanName);
+				if (isViewValidForCurrentUI(viewInfo)) {
+					views.add(viewInfo);
+				}
+			}
+		}
+		return views;
+	}
+
+	/**
+	 * Return a collection with all the registered Spring views for the current
+	 * UI which the current user is allowed to access. Note that only view
+	 * type/bean level access is checked ({@link ViewAccessControl}), and view
+	 * instance specific checks ({@link ViewInstanceAccessControl}) are not
+	 * applied.
+	 *
+	 * @return list of ViewInfo, not null
+	 */
+	protected List<ViewInfo> getAllowedViewsForCurrentUI() {
+		List<ViewInfo> views = new ArrayList<ViewInfo>();
+		for (ViewInfo view : getAllViewsForCurrentUI()) {
+			if (isAccessGranted(view)) {
+				views.add(view);
+			}
+		}
+		return views;
+	}
+
+	/**
+	 * Return a collection with all the registered Spring views with the given
+	 * view name for the current UI and which the current user is allowed to
+	 * access. Note that only view type/bean level access is checked (
+	 * {@link ViewAccessControl}), and view instance specific checks (
+	 * {@link ViewInstanceAccessControl}) are not applied.
+	 *
+	 * @param viewName
+	 *            view name in the form returned by {@link #getViewName(String)}
+	 *            (no parameters)
+	 * @return list of ViewInfo, not null
+	 */
+	protected List<ViewInfo> getAllowedViewsForCurrentUI(String viewName) {
+		List<ViewInfo> views = new ArrayList<ViewInfo>();
+		Set<String> allViews = getViewNameToBeanNamesMap().get(viewName);
+		if (allViews != null) {
+			for (String beanName : allViews) {
+				ViewInfo viewInfo = new ViewInfo(viewName, beanName);
+				if (isViewValidForCurrentUI(viewInfo) && isAccessGranted(viewInfo)) {
+					views.add(viewInfo);
+				}
+			}
+		}
+		return views;
+	}
+
+	/**
+	 * Return a collection with all the registered Spring views for the current
+	 * UI which the current user is allowed to access. Note that only view
+	 * type/bean level access is checked ({@link ViewAccessControl}), and view
+	 * instance specific checks ({@link ViewInstanceAccessControl}) are not
+	 * applied.
+	 *
+	 * @return collection of view names, not null
+	 */
+	public Collection<String> getViewNamesForCurrentUI() {
+		Collection<String> viewNames = new HashSet<String>();
+		for (ViewInfo view : getAllowedViewsForCurrentUI()) {
+			viewNames.add(view.getViewName());
+		}
+		return viewNames;
+	}
 
 	@Override
 	public String getViewName(String viewAndParameters) {
 		LOGGER.trace("Extracting view name from [{}]", viewAndParameters);
-		String viewName = null;
-		if (isViewNameValidForCurrentUI(viewAndParameters)) {
-			viewName = viewAndParameters;
-		} else {
-			int lastSlash = -1;
-			String viewPart = viewAndParameters;
-			while ((lastSlash = viewPart.lastIndexOf('/')) > -1) {
-				viewPart = viewPart.substring(0, lastSlash);
-				LOGGER.trace("Checking if [{}] is a valid view", viewPart);
-				if (isViewNameValidForCurrentUI(viewPart)) {
-					viewName = viewPart;
-					break;
+
+		String viewName = getViewName(viewAndParameters, getAllowedViewsForCurrentUI());
+		if (viewName != null) {
+			return viewName;
+		}
+
+		// no views found
+		LOGGER.trace("Found no view name in [{}]", viewAndParameters);
+
+		// check also disallowed views to support access denied view
+		if (getAccessDeniedViewClass() != null) {
+			viewName = getViewName(viewAndParameters, getAllViewsForCurrentUI());
+			return viewName;
+		}
+
+		// nothing found, not even disallowed views
+		return null;
+	}
+
+	protected String getViewName(String viewAndParameters, List<ViewInfo> views) {
+		// first look for exact matches
+		for (ViewInfo view : views) {
+			if (view.getViewName()
+					.equals(viewAndParameters)) {
+				LOGGER.trace("[{}] is a valid view", view.getViewName());
+				return view.getViewName();
+			}
+		}
+
+		// then look for prefix matches
+		int lastSlash = -1;
+		String viewPart = viewAndParameters;
+		while ((lastSlash = viewPart.lastIndexOf('/')) > -1) {
+			viewPart = viewPart.substring(0, lastSlash);
+			LOGGER.trace("Checking if [{}] is a valid view", viewPart);
+			for (ViewInfo view : views) {
+				if (view.getViewName()
+						.equals(viewPart)) {
+					LOGGER.trace("[{}] is a valid view", view.getViewName());
+					return view.getViewName();
 				}
 			}
 		}
-		if (viewName == null) {
-			LOGGER.trace("Found no view name in [{}]", viewAndParameters);
-		} else {
-			LOGGER.trace("[{}] is a valid view", viewName);
-		}
-		return viewName;
+		return null;
 	}
-	
-	/**
-     * Return a collection with all the registered Spring views for the current
-     * UI which the current user is allowed to access. Note that only view
-     * type/bean level access is checked ({@link ViewAccessControl}), and view
-     * instance specific checks ({@link ViewInstanceAccessControl}) are not
-     * applied.
-     *
-     * @return collection of view names, not null
-     */
-    public Collection<String> getViewNamesForCurrentUI() {
-        Collection<String> viewNames = new HashSet<String>();
-        for (ViewInfo view : getAllowedViewsForCurrentUI()) {
-            viewNames.add(view.getViewName());
-        }
-        return viewNames;
-    }
 
-    @Override
-    public String getViewName(String viewAndParameters) {
-        LOGGER.trace("Extracting view name from [{}]", viewAndParameters);
+	private boolean isViewNameUniqueForUIs(String beanName, Set<String> alreadRegistedBeanNamesForViewName) {
+		if (alreadRegistedBeanNamesForViewName.size() == 0) {
+			return true;
+		}
 
-        String viewName = getViewName(viewAndParameters,
-                getAllowedViewsForCurrentUI());
-        if (viewName != null) {
-            return viewName;
-        }
+		final Class<?> type = this.applicationContext.getType(beanName);
 
-        // no views found
-        LOGGER.trace("Found no view name in [{}]", viewAndParameters);
+		Assert.isAssignable(View.class, type, "bean did not implement View interface");
 
-        // check also disallowed views to support access denied view
-        if (getAccessDeniedViewClass() != null) {
-            viewName = getViewName(viewAndParameters,
-                    getAllViewsForCurrentUI());
-            return viewName;
-        }
+		final SpringView annotation = getWebApplicationContext().findAnnotationOnBean(beanName, SpringView.class);
 
-        // nothing found, not even disallowed views
-        return null;
-    }
+		Assert.notNull(annotation, "class did not have a SpringView annotation");
 
-    protected String getViewName(String viewAndParameters,
-            List<ViewInfo> views) {
-        // first look for exact matches
-        for (ViewInfo view : views) {
-            if (view.getViewName().equals(viewAndParameters)) {
-                LOGGER.trace("[{}] is a valid view", view.getViewName());
-                return view.getViewName();
-            }
-        }
+		if (annotation.ui().length == 0) {
+			LOGGER.error(	"View class [{}] with view name [{}] is available for all UI subclasses, but has other available beanNames [{}]",
+							type.getCanonicalName(), getViewNameFromAnnotation(type, annotation),
+							alreadRegistedBeanNamesForViewName);
+			return false;
+		}
 
-        // then look for prefix matches
-        int lastSlash = -1;
-        String viewPart = viewAndParameters;
-        while ((lastSlash = viewPart.lastIndexOf('/')) > -1) {
-            viewPart = viewPart.substring(0, lastSlash);
-            LOGGER.trace("Checking if [{}] is a valid view", viewPart);
-            for (ViewInfo view : views) {
-                if (view.getViewName().equals(viewPart)) {
-                    LOGGER.trace("[{}] is a valid view", view.getViewName());
-                    return view.getViewName();
-                }
-            }
-        }
-        return null;
-    }
-    
-    protected boolean isViewValidForCurrentUI(ViewInfo viewInfo) {
-        String beanName = viewInfo.getBeanName();
-        try {
-            final Class<?> type = getWebApplicationContext().getType(beanName);
-
-            Assert.isAssignable(View.class, type,
-                    "bean did not implement View interface");
-
-            final UI currentUI = UI.getCurrent();
-            final SpringView annotation = getWebApplicationContext()
-                    .findAnnotationOnBean(beanName, SpringView.class);
-
-            Assert.notNull(annotation,
-                    "class did not have a SpringView annotation");
-
-            if (annotation.ui().length == 0) {
-                LOGGER.trace(
-                        "View class [{}] with view name [{}] is available for all UI subclasses",
-                        type.getCanonicalName(),
-                        getViewNameFromAnnotation(type, annotation));
-            } else {
-                Class<? extends UI> validUI = getValidUIClass(currentUI,
-                        annotation.ui());
-                if (validUI != null) {
-                    LOGGER.trace(
-                            "View class [%s] with view name [{}] is available for UI subclass [{}]",
-                            type.getCanonicalName(),
-                            getViewNameFromAnnotation(type, annotation),
-                            validUI.getCanonicalName());
-                } else {
-                    return false;
-                }
-            }
-
-            return true;
-        } catch (NoSuchBeanDefinitionException ex) {
-            return false;
-        }
-    }
-    
-	private boolean isViewNameValidForCurrentUI(String viewName) {
-		final Set<String> beanNames = this.viewNameToBeanNamesMap.get(viewName);
-		if (beanNames != null) {
-			for (String beanName : beanNames) {
-				if (isViewBeanNameValidForCurrentUI(beanName)) {
-					// if we have an access denied view, this is checked by
-					// getView()
-					return getAccessDeniedView() != null || isAccessGrantedToBeanName(beanName);
+		for (Class<? extends UI> beanNameUI : annotation.ui()) {
+			for (String alreadyRegisteredBeanName : alreadRegistedBeanNamesForViewName) {
+				final SpringView alreadyRegisteredAnnotation = getWebApplicationContext().findAnnotationOnBean(	beanName,
+																												SpringView.class);
+				for (Class<? extends UI> alreadyRegisteredBeanNameUI : alreadyRegisteredAnnotation.ui()) {
+					if (alreadyRegisteredBeanNameUI.equals(beanNameUI)) {
+						return false;
+					}
 				}
 			}
 		}
-		return false;
+
+		return true;
 	}
 
-	private boolean isViewBeanNameValidForCurrentUI(String beanName) {
+	private boolean isDefaultViewNameUniqueForUIs(String beanName) {
+		if (this.defaultViewNames.size() == 0) {
+			return true;
+		}
+
+		final SpringView annotation = getWebApplicationContext().findAnnotationOnBean(beanName, SpringView.class);
+
+		if (annotation.ui().length == 0) {
+			return false;
+		}
+
+		for (Class<? extends UI> beanNameUI : annotation.ui()) {
+			for (String defaultViewName : this.defaultViewNames) {
+				final SpringView defaultViewNameAnnotation = getWebApplicationContext().findAnnotationOnBean(	beanName,
+																												SpringView.class);
+
+				for (Class<? extends UI> defaultViewNameUI : defaultViewNameAnnotation.ui()) {
+					if (defaultViewNameUI.equals(beanNameUI)) {
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	protected boolean isViewValidForCurrentUI(ViewInfo viewInfo) {
+		String beanName = viewInfo.getBeanName();
 		try {
-			final Class<?> type = this.applicationContext.getType(beanName);
+			final Class<?> type = getWebApplicationContext().getType(beanName);
 
 			Assert.isAssignable(View.class, type, "bean did not implement View interface");
 
 			final UI currentUI = UI.getCurrent();
-			final SpringView annotation = this.applicationContext.findAnnotationOnBean(beanName, SpringView.class);
+			final SpringView annotation = getWebApplicationContext().findAnnotationOnBean(beanName, SpringView.class);
 
 			Assert.notNull(annotation, "class did not have a SpringView annotation");
 
@@ -507,69 +491,6 @@ public class SpringViewProvider implements ViewProvider {
 		}
 	}
 
-	private boolean isViewNameUniqueForUIs(String beanName, Set<String> alreadRegistedBeanNamesForViewName) {
-		if (alreadRegistedBeanNamesForViewName.size() == 0) {
-			return true;
-		}
-
-		final Class<?> type = this.applicationContext.getType(beanName);
-
-		Assert.isAssignable(View.class, type, "bean did not implement View interface");
-
-		final SpringView annotation = this.applicationContext.findAnnotationOnBean(beanName, SpringView.class);
-
-		Assert.notNull(annotation, "class did not have a SpringView annotation");
-
-		if (annotation.ui().length == 0) {
-			LOGGER.error(	"View class [{}] with view name [{}] is available for all UI subclasses, but has other available beanNames [{}]",
-							type.getCanonicalName(), getViewNameFromAnnotation(type, annotation),
-							alreadRegistedBeanNamesForViewName);
-			return false;
-		}
-
-		for (Class<? extends UI> beanNameUI : annotation.ui()) {
-			for (String alreadyRegisteredBeanName : alreadRegistedBeanNamesForViewName) {
-				final SpringView alreadyRegisteredAnnotation = this.applicationContext.findAnnotationOnBean(alreadyRegisteredBeanName,
-																											SpringView.class);
-
-				for (Class<? extends UI> alreadyRegisteredBeanNameUI : alreadyRegisteredAnnotation.ui()) {
-					if (alreadyRegisteredBeanNameUI.equals(beanNameUI)) {
-						return false;
-					}
-				}
-			}
-		}
-
-		return true;
-	}
-
-	private boolean isDefaultViewNameUniqueForUIs(String beanName) {
-		if (this.defaultViewNames.size() == 0) {
-			return true;
-		}
-
-		final SpringView annotation = this.applicationContext.findAnnotationOnBean(beanName, SpringView.class);
-
-		if (annotation.ui().length == 0) {
-			return false;
-		}
-
-		for (Class<? extends UI> beanNameUI : annotation.ui()) {
-			for (String defaultViewName : this.defaultViewNames) {
-				final SpringView defaultViewNameAnnotation = this.applicationContext.findAnnotationOnBean(	getBeanNameOfViewName(defaultViewName),
-																											SpringView.class);
-
-				for (Class<? extends UI> defaultViewNameUI : defaultViewNameAnnotation.ui()) {
-					if (defaultViewNameUI.equals(beanNameUI)) {
-						return false;
-					}
-				}
-			}
-		}
-
-		return true;
-	}
-
 	private Class<? extends UI> getValidUIClass(UI currentUI, Class<? extends UI>[] validUIClasses) {
 		for (Class<? extends UI> validUI : validUIClasses) {
 			if (validUI.isAssignableFrom(currentUI.getClass())) {
@@ -581,264 +502,204 @@ public class SpringViewProvider implements ViewProvider {
 
 	@Override
 	public View getView(String viewName) {
-		final Set<String> beanNames = this.viewNameToBeanNamesMap.get(viewName);
-		if (beanNames != null) {
-			for (String beanName : beanNames) {
-				if (isViewBeanNameValidForCurrentUI(beanName)) {
-					return getViewFromApplicationContext(viewName, beanName);
-				}
+		List<ViewInfo> allowedViews = getAllowedViewsForCurrentUI(viewName);
+		for (ViewInfo viewInfo : allowedViews) {
+			View view = getViewFromApplicationContext(viewInfo);
+			if (view != null) {
+				return view;
 			}
 		}
 		LOGGER.warn("Found no view with name [{}]", viewName);
-		return null;
+
+		// Default to access denied view if defined -
+		// returns null if no access denied view is set
+		return getAccessDeniedView();
 	}
 
-	private View getViewFromApplicationContext(String viewName, String beanName) {
+	/**
+	 * Fetches a view from the application context. For view scoped views
+	 * created here, a view scope is set up to be active during the view
+	 * creation and until navigating away from the view.
+	 *
+	 * @param viewInfo
+	 *            view metadata
+	 * @return view instance from the application context, not null
+	 * @throws BeansException
+	 *             if no suitable bean is found or view scope initialization
+	 *             failed
+	 */
+	protected View getViewFromApplicationContext(ViewInfo viewInfo) {
 		View view = null;
-		if (isAccessGrantedToBeanName(beanName)) {
-			final BeanDefinition beanDefinition = this.beanDefinitionRegistry.getBeanDefinition(beanName);
+		if (isAccessGranted(viewInfo)) {
+			final BeanDefinition beanDefinition = getBeanDefinitionRegistry().getBeanDefinition(viewInfo.getBeanName());
 			if (beanDefinition	.getScope()
 								.equals(ViewScopeImpl.VAADIN_VIEW_SCOPE_NAME)) {
-				LOGGER.trace("View [{}] is view scoped, activating scope", viewName);
+				LOGGER.trace("View [{}] is view scoped, activating scope", viewInfo.getViewName());
 				final ViewCache viewCache = ViewScopeImpl	.getViewCacheRetrievalStrategy()
-															.getViewCache(this.applicationContext);
-				viewCache.creatingView(viewName);
+															.getViewCache(getWebApplicationContext());
+				viewCache.creatingView(viewInfo.getViewName());
 				try {
-					view = getViewFromApplicationContextAndCheckAccess(beanName);
+					view = getViewFromApplicationContextAndCheckAccess(viewInfo);
 				} finally {
-					viewCache.viewCreated(viewName, view);
+					viewCache.viewCreated(viewInfo.getViewName(), view);
 				}
 			} else {
-				view = getViewFromApplicationContextAndCheckAccess(beanName);
+				// view scope is not active for non-view-scope views as we don't
+				// hook into their lifecycle
+				view = getViewFromApplicationContextAndCheckAccess(viewInfo);
 			}
 		}
-		if (view != null) {
-			return view;
-		} else {
-			return getAccessDeniedView();
-		}
+		return view;
 	}
 
-	private View getViewFromApplicationContextAndCheckAccess(String beanName) {
-		final View view = (View) this.applicationContext.getBean(beanName);
-		if (isAccessGrantedToViewInstance(beanName, view)) {
+	protected BeanDefinitionRegistry getBeanDefinitionRegistry() {
+		if (this.beanDefinitionRegistry == null) {
+			AutowireCapableBeanFactory factory = getWebApplicationContext().getAutowireCapableBeanFactory();
+			this.beanDefinitionRegistry = (BeanDefinitionRegistry) factory;
+		}
+		return this.beanDefinitionRegistry;
+	}
+
+	protected View getViewFromApplicationContextAndCheckAccess(ViewInfo viewInfo) {
+		String beanName = viewInfo.getBeanName();
+		final View view = (View) getWebApplicationContext().getBean(beanName);
+		if (isAccessGrantedToViewInstance(viewInfo, view)) {
 			return view;
 		} else {
 			return null;
 		}
 	}
-	
-	private Class<? extends UI> getValidUIClass(UI currentUI,
-            Class<? extends UI>[] validUIClasses) {
-        for (Class<? extends UI> validUI : validUIClasses) {
-            if (validUI.isAssignableFrom(currentUI.getClass())) {
-                return validUI;
-            }
-        }
-        return null;
-    }
 
-    @Override
-    public View getView(String viewName) {
-        List<ViewInfo> allowedViews = getAllowedViewsForCurrentUI(viewName);
-        for (ViewInfo viewInfo : allowedViews) {
-            View view = getViewFromApplicationContext(viewInfo);
-            if (view != null) {
-                return view;
-            }
-        }
-        LOGGER.warn("Found no view with name [{}]", viewName);
-
-        // Default to access denied view if defined -
-        // returns null if no access denied view is set
-        return getAccessDeniedView();
-    }
-
-    /**
-     * Fetches a view from the application context. For view scoped views
-     * created here, a view scope is set up to be active during the view
-     * creation and until navigating away from the view.
-     *
-     * @param viewInfo
-     *            view metadata
-     * @return view instance from the application context, not null
-     * @throws BeansException
-     *             if no suitable bean is found or view scope initialization
-     *             failed
-     */
-    protected View getViewFromApplicationContext(ViewInfo viewInfo) {
-        View view = null;
-        if (isAccessGranted(viewInfo)) {
-            final BeanDefinition beanDefinition = getBeanDefinitionRegistry()
-                    .getBeanDefinition(viewInfo.getBeanName());
-            if (beanDefinition.getScope()
-                    .equals(ViewScopeImpl.VAADIN_VIEW_SCOPE_NAME)) {
-                LOGGER.trace("View [{}] is view scoped, activating scope",
-                        viewInfo.getViewName());
-                final ViewCache viewCache = ViewScopeImpl
-                        .getViewCacheRetrievalStrategy()
-                        .getViewCache(getWebApplicationContext());
-                viewCache.creatingView(viewInfo.getViewName());
-                try {
-                    view = getViewFromApplicationContextAndCheckAccess(
-                            viewInfo);
-                } finally {
-                    viewCache.viewCreated(viewInfo.getViewName(), view);
-                }
-            } else {
-                // view scope is not active for non-view-scope views as we don't
-                // hook into their lifecycle
-                view = getViewFromApplicationContextAndCheckAccess(viewInfo);
-            }
-        }
-        return view;
-    }
-
-    protected BeanDefinitionRegistry getBeanDefinitionRegistry() {
-        if (beanDefinitionRegistry == null) {
-            AutowireCapableBeanFactory factory = getWebApplicationContext()
-                    .getAutowireCapableBeanFactory();
-            beanDefinitionRegistry = (BeanDefinitionRegistry) factory;
-        }
-        return beanDefinitionRegistry;
-    }
-
-    protected View getViewFromApplicationContextAndCheckAccess(
-            ViewInfo viewInfo) {
-        String beanName = viewInfo.getBeanName();
-        final View view = (View) getWebApplicationContext().getBean(beanName);
-        if (isAccessGrantedToViewInstance(viewInfo, view)) {
-            return view;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Returns an instance of the access denied view from the application
-     * context based on {@link #setAccessDeniedViewClass(Class)}.
-     *
-     * @return access denied view instance from application context or null if
-     *         no access denied view class is set
-     */
+	/**
+	 * Returns an instance of the access denied view from the application
+	 * context based on {@link #setAccessDeniedViewClass(Class)}.
+	 *
+	 * @return access denied view instance from application context or null if
+	 *         no access denied view class is set
+	 */
 	protected View getAccessDeniedView() {
 		if (this.accessDeniedViewClass != null) {
-			return this.applicationContext.getBean(this.accessDeniedViewClass);
+			return getWebApplicationContext().getBean(this.accessDeniedViewClass);
 		} else {
 			return null;
 		}
 	}
-	
-	protected boolean isAccessGranted(ViewInfo view) {
-        final UI currentUI = UI.getCurrent();
-        final Map<String, ViewAccessControl> accessDelegates = getWebApplicationContext()
-                .getBeansOfType(ViewAccessControl.class);
-        for (ViewAccessControl accessDelegate : accessDelegates.values()) {
-            if (!accessDelegate.isAccessGranted(currentUI,
-                    view.getBeanName())) {
-                LOGGER.debug(
-                        "Access delegate [{}] denied access to view with bean name [{}]",
-                        accessDelegate, view.getBeanName());
-                return false;
-            }
-        }
-        return true;
-    }
 
-	private boolean isAccessGrantedToBeanName(String beanName) {
+	protected boolean isAccessGranted(ViewInfo view) {
 		final UI currentUI = UI.getCurrent();
-		final Map<String, ViewAccessControl> accessDelegates = this.applicationContext.getBeansOfType(ViewAccessControl.class);
+		final Map<String, ViewAccessControl> accessDelegates = getWebApplicationContext().getBeansOfType(ViewAccessControl.class);
 		for (ViewAccessControl accessDelegate : accessDelegates.values()) {
-			if (!accessDelegate.isAccessGranted(currentUI, beanName)) {
+			if (!accessDelegate.isAccessGranted(currentUI, view.getBeanName())) {
 				LOGGER.debug(	"Access delegate [{}] denied access to view with bean name [{}]", accessDelegate,
-								beanName);
+								view.getBeanName());
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private boolean isAccessGrantedToViewInstance(String beanName, View view) {
+	protected boolean isAccessGrantedToViewInstance(ViewInfo viewInfo, View view) {
 		final UI currentUI = UI.getCurrent();
-		final Map<String, ViewInstanceAccessControl> accessDelegates = this.applicationContext.getBeansOfType(ViewInstanceAccessControl.class);
+		final Map<String, ViewInstanceAccessControl> accessDelegates = getWebApplicationContext().getBeansOfType(ViewInstanceAccessControl.class);
 		for (ViewInstanceAccessControl accessDelegate : accessDelegates.values()) {
-			if (!accessDelegate.isAccessGranted(currentUI, beanName, view)) {
+			if (!accessDelegate.isAccessGranted(currentUI, viewInfo.getBeanName(), view)) {
 				LOGGER.debug("Access delegate [{}] denied access to view [{}]", accessDelegate, view);
 				return false;
 			}
 		}
 		return true;
 	}
-	
+
 	protected ApplicationContext getWebApplicationContext() {
-        if (applicationContext == null) {
-            // Assume we have serialized and deserialized and Navigator is
-            // trying to find a view so UI.getCurrent() is available
-            UI ui = UI.getCurrent();
-            if (ui == null) {
-                throw new IllegalStateException(
-                        "Could not find application context and no current UI is available");
-            }
-            applicationContext = ((SpringVaadinServletService) ui.getSession()
-                    .getService()).getWebApplicationContext();
-        }
+		if (this.applicationContext == null) {
+			// Assume we have serialized and deserialized and Navigator is
+			// trying to find a view so UI.getCurrent() is available
+			UI ui = UI.getCurrent();
+			if (ui == null) {
+				throw new IllegalStateException("Could not find application context and no current UI is available");
+			}
+			this.applicationContext = ((SpringVaadinServletService) ui	.getSession()
+																		.getService()).getWebApplicationContext();
+		}
 
-        return applicationContext;
-    }
-
-    /**
-     * Get the mapping from view names to the collections of corresponding bean
-     * names. This method is primarily for internal use, and users should
-     * typically override {@link #getAllViewsForCurrentUI()} or
-     * {@link #getAllowedViewsForCurrentUI()} instead of using this method.
-     *
-     * @return internal mapping from view names to correspoding bean names
-     */
-    protected Map<String, Set<String>> getViewNameToBeanNamesMap() {
-        return viewNameToBeanNamesMap;
-    }
-
-	public Class<?> getTypeOfBeanName(String beanName) {
-		return this.applicationContext.getType(beanName);
+		return this.applicationContext;
 	}
 
-	public SpringView getAnnotationOfBeanName(String beanName) {
-		return this.applicationContext.findAnnotationOnBean(beanName, SpringView.class);
+	/**
+	 * Get the mapping from view names to the collections of corresponding bean
+	 * names. This method is primarily for internal use, and users should
+	 * typically override {@link #getAllViewsForCurrentUI()} or
+	 * {@link #getAllowedViewsForCurrentUI()} instead of using this method.
+	 *
+	 * @return internal mapping from view names to correspoding bean names
+	 */
+	protected Map<String, Set<String>> getViewNameToBeanNamesMap() {
+		return this.viewNameToBeanNamesMap;
 	}
 
-	public List<String> getRootBeanNames() {
-		List<String> rootBeanNames = new ArrayList<String>();
+	public String getBeanNameOfViewName(String viewName) {
+		Set<String> beanNames = getViewNameToBeanNamesMap().get(viewName);
+
+		if (beanNames == null) {
+			return null;
+		}
+
+		for (String beanName : beanNames) {
+			ViewInfo viewInfo = new ViewInfo(viewName, beanName);
+			if (isViewValidForCurrentUI(viewInfo)) {
+				return beanName;
+			}
+		}
+
+		return null;
+	}
+
+	public List<ViewInfo> getRootViews() {
+		List<ViewInfo> rootViews = new ArrayList<ViewInfo>();
 
 		for (String rootViewName : this.rootViewNames) {
 			for (String beanName : this.viewNameToBeanNamesMap.get(rootViewName)) {
-				if (isViewBeanNameValidForCurrentUI(beanName)) {
-					rootBeanNames.add(beanName);
+				ViewInfo viewInfo = new ViewInfo(rootViewName, beanName);
+				if (isViewValidForCurrentUI(viewInfo)) {
+					rootViews.add(viewInfo);
 				}
 			}
 		}
 
-		rootBeanNames.sort(this.orderComparator);
+		rootViews.sort(this.orderComparator);
 
-		return rootBeanNames;
+		return rootViews;
 	}
 
-	public List<String> getChildBeanNames(String viewId) {
-		List<String> childBeanNames = new ArrayList<String>();
+	public List<ViewInfo> getChildViews(String parentViewName) {
+		List<ViewInfo> childViews = new ArrayList<ViewInfo>();
 
-		Set<String> viewNames = this.viewNameParentToViewNameChildsMap.get(viewId);
+		Set<String> viewNames = this.viewNameParentToViewNameChildsMap.get(parentViewName);
 		if (viewNames != null) {
-			for (String viewName : this.viewNameParentToViewNameChildsMap.get(viewId)) {
-				for (String beanName : this.viewNameToBeanNamesMap.get(viewName)) {
-					if (isViewBeanNameValidForCurrentUI(beanName)) {
-						childBeanNames.add(beanName);
+			for (String childViewName : viewNames) {
+				for (String beanName : this.viewNameToBeanNamesMap.get(childViewName)) {
+					ViewInfo viewInfo = new ViewInfo(childViewName, beanName);
+					if (isViewValidForCurrentUI(viewInfo)) {
+						childViews.add(viewInfo);
 					}
 				}
 			}
 		}
 
-		childBeanNames.sort(this.orderComparator);
+		childViews.sort(this.orderComparator);
 
-		return childBeanNames;
+		return childViews;
+	}
+
+	public String getFirstViewNameOfChildren(String parentViewName) {
+		ViewInfo firstViewInfo = getChildViews(parentViewName).get(0);
+		return Conventions.deriveMappingForView(getWebApplicationContext().getType(firstViewInfo.getBeanName()),
+												getWebApplicationContext().findAnnotationOnBean(firstViewInfo.getBeanName(),
+																								SpringView.class));
+	}
+
+	public boolean hasViewChildren(String viewName) {
+		return !getChildViews(viewName).isEmpty();
 	}
 
 	public String getParentViewName(String viewId) {
@@ -854,30 +715,12 @@ public class SpringViewProvider implements ViewProvider {
 		return "";
 	}
 
-	public String getBeanNameOfViewName(String viewName) {
-		Set<String> beanNames = this.viewNameToBeanNamesMap.get(viewName);
-
-		if (beanNames == null) {
-			return null;
-		}
-
-		for (String beanName : beanNames) {
-			if (isViewBeanNameValidForCurrentUI(beanName)) {
-				return beanName;
-			}
-		}
-
-		return null;
-	}
-
-	public void setOrderComparator(Comparator<? super String> orderComparator) {
-		this.orderComparator = orderComparator;
-	}
-
-	public String getDefaultViewId() {
+	public String getDefaultViewName() {
 		for (String viewName : this.defaultViewNames) {
-			if (isViewNameValidForCurrentUI(viewName)) {
-				return viewName;
+			for (String beanName : this.viewNameToBeanNamesMap.get(viewName)) {
+				if (isViewValidForCurrentUI(new ViewInfo(viewName, beanName))) {
+					return viewName;
+				}
 			}
 		}
 		return null;
