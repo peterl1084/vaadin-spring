@@ -61,7 +61,7 @@ import com.vaadin.ui.UI;
 @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
 @Documented
 @SpringComponent
-@ViewScope
+@UIScope
 public @interface SpringView {
 
 	/**
