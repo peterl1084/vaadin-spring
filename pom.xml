@@ -33,9 +33,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/vaadin/spring</url>
-        <connection>scm:git:git@github.com:vaadin/spring.git</connection>
-        <developerConnection>scm:git:git@github.com:vaadin/spring.git</developerConnection>
+        <url>https://github.com/bonprix/vaadin-spring</url>
+        <connection>scm:git:git@github.com:bonprix/vaadin-spring.git</connection>
+        <developerConnection>scm:git:git@github.com:bonprix/vaadin-spring.git</developerConnection>
     </scm>
 
     <developers>
