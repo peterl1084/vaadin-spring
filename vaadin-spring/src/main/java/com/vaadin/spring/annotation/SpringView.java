@@ -121,4 +121,11 @@ public @interface SpringView {
 	 * @return is default screen
 	 */
 	public boolean isDefault() default false;
+
+	/**
+	 * The capabilityKey used for securing the view
+	 * 
+	 * @return capabilityKey, default ""
+	 */
+	public String capabilityKey() default "";
 }
