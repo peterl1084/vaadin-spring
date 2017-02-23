@@ -5,3 +5,4 @@ target/
 vaadin-spring/target/
 .idea
 *.iml
+rebel.xml
