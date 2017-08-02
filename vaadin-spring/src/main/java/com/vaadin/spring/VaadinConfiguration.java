@@ -49,23 +49,23 @@ import com.vaadin.ui.declarative.Design;
 @Configuration
 public class VaadinConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
 
-    private ApplicationContext applicationContext;
-    private BeanDefinitionRegistry beanDefinitionRegistry;
+	private ApplicationContext applicationContext;
+	private BeanDefinitionRegistry beanDefinitionRegistry;
 
-    @Bean
-    static VaadinSessionScope vaadinSessionScope() {
-        return new VaadinSessionScope();
-    }
+	@Bean
+	static VaadinSessionScope vaadinSessionScope() {
+		return new VaadinSessionScope();
+	}
 
-    @Bean
-    static UIScopeImpl uIScope() {
-        return new UIScopeImpl();
-    }
+	@Bean
+	static UIScopeImpl uIScope() {
+		return new UIScopeImpl();
+	}
 
-    @Bean
-    static ViewScopeImpl viewScope() {
-        return new ViewScopeImpl();
-    }
+	@Bean
+	static ViewScopeImpl viewScope() {
+		return new ViewScopeImpl();
+	}
 
     @Bean
     @UIScope
@@ -73,11 +73,11 @@ public class VaadinConfiguration implements ApplicationContextAware, BeanDefinit
         return new SpringViewProvider(this.applicationContext, this.beanDefinitionRegistry);
     }
 
-    @Bean
-    @com.vaadin.spring.annotation.UIScope
-    ViewCache viewCache() {
-        return new DefaultViewCache();
-    }
+	@Bean
+	@com.vaadin.spring.annotation.UIScope
+	ViewCache viewCache() {
+		return new DefaultViewCache();
+	}
 
     @Bean
     VaadinSpringComponentFactory componentFactory() {

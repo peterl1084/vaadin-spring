@@ -64,15 +64,15 @@ import com.vaadin.ui.UI;
  * &#064;SpringUI
  * public class MyUI extends UI {
  *
- *     &#064;Autowired
- *     SpringViewProvider viewProvider;
+ * 	&#064;Autowired
+ * 	SpringViewProvider viewProvider;
  *
- *     protected void init(VaadinRequest vaadinRequest) {
- *         Navigator navigator = new Navigator(this, this);
- *         navigator.addProvider(viewProvider);
- *         setNavigator(navigator);
- *         // ...
- *     }
+ * 	protected void init(VaadinRequest vaadinRequest) {
+ * 		Navigator navigator = new Navigator(this, this);
+ * 		navigator.addProvider(viewProvider);
+ * 		setNavigator(navigator);
+ * 		// ...
+ * 	}
  * }
  * </pre>
  *
