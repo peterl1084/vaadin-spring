@@ -58,87 +58,91 @@ import com.vaadin.server.VaadinSession;
  */
 public class SpringVaadinServlet extends VaadinServlet {
 
-	private static final long serialVersionUID = 5371983676318947478L;
+    private static final long serialVersionUID = 5371983676318947478L;
 
-	private String serviceUrlPath = null;
+    private String serviceUrlPath = null;
 
-	@Override
-	protected void servletInitialized() throws ServletException {
-		getService().addSessionInitListener(new SessionInitListener() {
+    @Override
+    protected void servletInitialized() throws ServletException {
+        getService().addSessionInitListener(new SessionInitListener() {
 
-			private static final long serialVersionUID = -6307820453486668084L;
+            private static final long serialVersionUID = -6307820453486668084L;
 
-			@Override
-			public void sessionInit(SessionInitEvent sessionInitEvent) throws ServiceException {
-				WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+            @Override
+            public void sessionInit(SessionInitEvent sessionInitEvent)
+                    throws ServiceException {
+                WebApplicationContext webApplicationContext = WebApplicationContextUtils
+                        .getWebApplicationContext(getServletContext());
 
-				// remove DefaultUIProvider instances to avoid mapping
-				// extraneous UIs if e.g. a servlet is declared as a nested
-				// class in a UI class
-				VaadinSession session = sessionInitEvent.getSession();
-				List<UIProvider> uiProviders = new ArrayList<UIProvider>(session.getUIProviders());
-				for (UIProvider provider : uiProviders) {
-					// use canonical names as these may have been loaded with
-					// different classloaders
-					if (DefaultUIProvider.class	.getCanonicalName()
-												.equals(provider.getClass()
-																.getCanonicalName())) {
-						session.removeUIProvider(provider);
-					}
-				}
+                // remove DefaultUIProvider instances to avoid mapping
+                // extraneous UIs if e.g. a servlet is declared as a nested
+                // class in a UI class
+                VaadinSession session = sessionInitEvent.getSession();
+                List<UIProvider> uiProviders = new ArrayList<UIProvider>(
+                        session.getUIProviders());
+                for (UIProvider provider : uiProviders) {
+                    // use canonical names as these may have been loaded with
+                    // different classloaders
+                    if (DefaultUIProvider.class.getCanonicalName()
+                            .equals(provider.getClass().getCanonicalName())) {
+                        session.removeUIProvider(provider);
+                    }
+                }
 
-				// add Spring UI provider
-				SpringUIProvider uiProvider = new SpringUIProvider(session);
-				session.addUIProvider(uiProvider);
-			}
-		});
-	}
+                // add Spring UI provider
+                SpringUIProvider uiProvider = new SpringUIProvider(session);
+                session.addUIProvider(uiProvider);
+            }
+        });
+    }
 
-	/**
-	 * Return the path of the service URL (URL for all client-server
-	 * communication) relative to the context path. A value of null means that
-	 * the default service path of Vaadin should be used. The path should start
-	 * with a slash.
-	 *
-	 * @return service URL path relative to context path (starting with slash)
-	 *         or null to use the default
-	 */
-	public String getServiceUrlPath() {
-		return this.serviceUrlPath;
-	}
+    /**
+     * Return the path of the service URL (URL for all client-server
+     * communication) relative to the context path. A value of null means that
+     * the default service path of Vaadin should be used. The path should start
+     * with a slash.
+     *
+     * @return service URL path relative to context path (starting with slash)
+     *         or null to use the default
+     */
+    public String getServiceUrlPath() {
+        return this.serviceUrlPath;
+    }
 
-	/**
-	 * Set the path of the service URL (URL for all client-server communication)
-	 * to use, relative to the context path. The value null means that the
-	 * default service URL of Vaadin should be used. The service URL path must
-	 * be set before servlet service instances are created, i.e. before the
-	 * servlet is placed into service by the servlet container.
-	 *
-	 * @param serviceUrlPath
-	 *            service URL path relative to the context path (starting with a
-	 *            slash) or null for default
-	 */
-	public void setServiceUrlPath(String serviceUrlPath) {
-		this.serviceUrlPath = serviceUrlPath;
-	}
+    /**
+     * Set the path of the service URL (URL for all client-server communication)
+     * to use, relative to the context path. The value null means that the
+     * default service URL of Vaadin should be used. The service URL path must
+     * be set before servlet service instances are created, i.e. before the
+     * servlet is placed into service by the servlet container.
+     *
+     * @param serviceUrlPath
+     *            service URL path relative to the context path (starting with a
+     *            slash) or null for default
+     */
+    public void setServiceUrlPath(String serviceUrlPath) {
+        this.serviceUrlPath = serviceUrlPath;
+    }
 
-	@Override
-	protected VaadinServletService createServletService(DeploymentConfiguration deploymentConfiguration)
-			throws ServiceException {
-		// this is needed when using a custom service URL
-		SpringVaadinServletService service = new SpringVaadinServletService(this, deploymentConfiguration,
-				getServiceUrlPath());
-		service.init();
-		return service;
-	}
+    @Override
+    protected VaadinServletService createServletService(
+            DeploymentConfiguration deploymentConfiguration)
+            throws ServiceException {
+        // this is needed when using a custom service URL
+        SpringVaadinServletService service = new SpringVaadinServletService(
+                this, deploymentConfiguration, getServiceUrlPath());
+        service.init();
+        return service;
+    }
 
-	@Override
-	protected VaadinServletRequest createVaadinRequest(HttpServletRequest request) {
-		if (this.serviceUrlPath != null) {
-			return new SpringVaadinServletRequest(request, getService(), true);
-		} else {
-			return new VaadinServletRequest(request, getService());
-		}
-	}
+    @Override
+    protected VaadinServletRequest createVaadinRequest(
+            HttpServletRequest request) {
+        if (this.serviceUrlPath != null) {
+            return new SpringVaadinServletRequest(request, getService(), true);
+        } else {
+            return new VaadinServletRequest(request, getService());
+        }
+    }
 
 }

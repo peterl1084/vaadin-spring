@@ -67,16 +67,16 @@ public class SpringUIProviderTestWithCustomNavigatorBean
     @Test
     public void testConfigureNavigator() {
         TestUI ui = createUi(TestUI.class);
-        Assert.isTrue(
-                ui.getNavigator()
-                        .getDisplay() instanceof SingleComponentContainerViewDisplay,
+        Assert.isTrue(ui.getNavigator()
+                .getDisplay() instanceof SingleComponentContainerViewDisplay,
                 "Navigator is not configured with the correct type of ViewDisplay");
     }
 
     @Test
     public void testFindSpringViewDisplay() throws Exception {
         TestUI ui = createUi(TestUI.class);
-        Assert.isInstanceOf(TestUI.class, getUiProvider().findSpringViewDisplay(ui),
+        Assert.isInstanceOf(TestUI.class,
+                getUiProvider().findSpringViewDisplay(ui),
                 "View display is not a TestUI");
     }
 

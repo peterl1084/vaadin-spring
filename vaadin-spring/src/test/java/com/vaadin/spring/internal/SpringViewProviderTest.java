@@ -94,13 +94,13 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
         public void enter(ViewChangeEvent event) {
         }
     }
-    
+
     @SpringView(name = "${undefined.view.name.key:default}", ui = TestUI1.class)
     private static class TestView5 implements View {
         @Override
         public void enter(ViewChangeEvent event) {
         }
-    }    
+    }
 
     @Configuration
     @EnableVaadinNavigation
@@ -145,7 +145,7 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
         @Bean
         @ViewScope
         public TestView5 view5() {
-        	return new TestView5();
+            return new TestView5();
         }
 
         @Bean
@@ -197,9 +197,9 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
         Assert.assertTrue("Root view not returned by SpringViewProvider",
                 views.contains("view2"));
         Assert.assertTrue("Root view not returned by SpringViewProvider",
-        		views.contains("view4"));
+                views.contains("view4"));
         Assert.assertTrue("Root view not returned by SpringViewProvider",
-        		views.contains("default"));
+                views.contains("default"));
         UI.setCurrent(null);
     }
 

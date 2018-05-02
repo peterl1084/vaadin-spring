@@ -40,7 +40,7 @@ import com.vaadin.ui.UI;
  * <pre>
  * &#064;SpringView(name = &quot;&quot;)
  * public class MyDefaultView extends CustomComponent implements View {
- * 	// ...
+ *     // ...
  * }
  * </pre>
  *
@@ -50,7 +50,7 @@ import com.vaadin.ui.UI;
  * <pre>
  * &#064;SpringView(name = &quot;myView&quot;, ui = MyUI.class)
  * public class MyView extends CustomComponent implements View {
- * 	// ...
+ *     // ...
  * }
  * </pre>
  *
@@ -64,68 +64,68 @@ import com.vaadin.ui.UI;
 @UIScope
 public @interface SpringView {
 
-	/**
-	 * The name of the view. This is the name that is to be passed to the
-	 * {@link com.vaadin.navigator.Navigator} when navigating to the view. There
-	 * can be multiple views with the same name as long as they belong to
-	 * separate UI subclasses.
-	 *
-	 * If the default value {@link #USE_CONVENTIONS} is used, the name of the
-	 * view is derived from the class name so that e.g. UserDetailView becomes
-	 * "user-detail". Although auto-generated view names are supported, using
-	 * explicit naming of views is strongly recommended.
-	 *
-	 * @see #ui()
-	 */
-	String name() default USE_CONVENTIONS;
+    /**
+     * The name of the view. This is the name that is to be passed to the
+     * {@link com.vaadin.navigator.Navigator} when navigating to the view. There
+     * can be multiple views with the same name as long as they belong to
+     * separate UI subclasses.
+     *
+     * If the default value {@link #USE_CONVENTIONS} is used, the name of the
+     * view is derived from the class name so that e.g. UserDetailView becomes
+     * "user-detail". Although auto-generated view names are supported, using
+     * explicit naming of views is strongly recommended.
+     *
+     * @see #ui()
+     */
+    String name() default USE_CONVENTIONS;
 
-	/**
-	 * USE_CONVENTIONS is treated as a special case that will cause the
-	 * automatic View mapping to occur.
-	 */
-	public static final String USE_CONVENTIONS = "USE CONVENTIONS";
+    /**
+     * USE_CONVENTIONS is treated as a special case that will cause the
+     * automatic View mapping to occur.
+     */
+    public static final String USE_CONVENTIONS = "USE CONVENTIONS";
 
-	/**
-	 * By default, the view will be available for all UI subclasses in the
-	 * application. This attribute can be used to explicitly specify which
-	 * subclass (or subclasses) that the view belongs to.
-	 */
-	Class<? extends UI>[] ui() default {};
+    /**
+     * By default, the view will be available for all UI subclasses in the
+     * application. This attribute can be used to explicitly specify which
+     * subclass (or subclasses) that the view belongs to.
+     */
+    Class<? extends UI>[] ui() default {};
 
-	/**
-	 * The name of the parent view if this module is a sub view. Default value
-	 * is "" when top level view.
-	 * 
-	 * @return the parent view name
-	 */
-	String parentName() default "";
+    /**
+     * The name of the parent view if this module is a sub view. Default value
+     * is "" when top level view.
+     * 
+     * @return the parent view name
+     */
+    String parentName() default "";
 
-	/**
-	 * The icon of the view.
-	 * 
-	 * @return the icon of the view
-	 */
-	FontAwesome icon() default FontAwesome.FILE;
+    /**
+     * The icon of the view.
+     * 
+     * @return the icon of the view
+     */
+    FontAwesome icon() default FontAwesome.FILE;
 
-	/**
-	 * The order number of the view. All views on the same level/parent will be
-	 * ordered ascending by this number. Default is -1 meaning unsorted
-	 * 
-	 * @return the sorting number
-	 */
-	public int order() default -1;
+    /**
+     * The order number of the view. All views on the same level/parent will be
+     * ordered ascending by this number. Default is -1 meaning unsorted
+     * 
+     * @return the sorting number
+     */
+    public int order() default -1;
 
-	/**
-	 * 
-	 * 
-	 * @return is default screen
-	 */
-	public boolean isDefault() default false;
+    /**
+     * 
+     * 
+     * @return is default screen
+     */
+    public boolean isDefault() default false;
 
-	/**
-	 * The capabilityKey used for securing the view
-	 * 
-	 * @return capabilityKey, default ""
-	 */
-	public String capabilityKey() default "";
+    /**
+     * The capabilityKey used for securing the view
+     * 
+     * @return capabilityKey, default ""
+     */
+    public String capabilityKey() default "";
 }

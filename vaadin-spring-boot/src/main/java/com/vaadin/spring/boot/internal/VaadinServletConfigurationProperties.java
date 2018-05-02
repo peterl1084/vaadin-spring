@@ -24,8 +24,8 @@ import com.vaadin.annotations.VaadinServletConfiguration;
  * similarly named parameters of {@link VaadinServletConfiguration} and can be
  * set in various ways.
  *
- * @see <a
- *      href="http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html">http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html</a>
+ * @see <a href=
+ *      "http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html">http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html</a>
  */
 @ConfigurationProperties(prefix = "vaadin.servlet")
 public class VaadinServletConfigurationProperties {

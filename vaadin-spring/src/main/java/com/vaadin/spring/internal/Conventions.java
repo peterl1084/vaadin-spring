@@ -39,8 +39,8 @@ public final class Conventions {
             // derive mapping from classname
             // do not use proxy class names
             Class<?> realBeanClass = ClassUtils.getUserClass(beanClass);
-            String mapping = realBeanClass.getSimpleName().replaceFirst(
-                    "View$", "");
+            String mapping = realBeanClass.getSimpleName().replaceFirst("View$",
+                    "");
             return upperCamelToLowerHyphen(mapping);
         }
     }

@@ -47,8 +47,8 @@ public class SpringViewDisplayRegistrationBean {
      * this method or {@link #setBeanName(String)} should be called.
      *
      * @param beanClass
-     *            class of the bean that contains the SpringViewDisplay annotation
-     *            or has it directly on the class
+     *            class of the bean that contains the SpringViewDisplay
+     *            annotation or has it directly on the class
      */
     public void setBeanClass(Class<?> beanClass) {
         this.beanClass = beanClass;

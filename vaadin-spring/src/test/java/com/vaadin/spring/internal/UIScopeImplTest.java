@@ -67,8 +67,8 @@ public class UIScopeImplTest {
 
         vaadinBSRetrieval = mock(VaadinSessionBeanStoreRetrievalStrategy.class);
         when(vaadinBSRetrieval.getBeanStore()).thenReturn(beanStore);
-        when(vaadinBSRetrieval.getConversationId()).thenReturn(
-                TEST_CONVERSATION_ID);
+        when(vaadinBSRetrieval.getConversationId())
+                .thenReturn(TEST_CONVERSATION_ID);
 
         uiScopeImpl = new UIScopeImpl();
         UIScopeImpl.setBeanStoreRetrievalStrategy(vaadinBSRetrieval);
@@ -147,8 +147,8 @@ public class UIScopeImplTest {
     // able to test the BeanStoreRetrievalStrategy class.
     // To use it, call this method and write your test logic inside the
     // test method implemented from BeanStoreRetrievalStrategyTest interface.
-    private synchronized void beanStoreTest(
-            BeanStoreRetrievalStrategyTest test, boolean openVaadinSession) {
+    private synchronized void beanStoreTest(BeanStoreRetrievalStrategyTest test,
+            boolean openVaadinSession) {
         WrappedSession wrappedSession = mock(WrappedSession.class);
         VaadinService vaadinService = mock(VaadinService.class);
 
@@ -196,7 +196,8 @@ public class UIScopeImplTest {
 
         beanStoreTest(new BeanStoreRetrievalStrategyTest() {
             @Override
-            public void test(VaadinSession session, UIStore uiStore, UIID uiid) {
+            public void test(VaadinSession session, UIStore uiStore,
+                    UIID uiid) {
                 thrown.expect(IllegalStateException.class);
                 thrown.expectMessage("Current VaadinSession is not open");
 
@@ -210,12 +211,14 @@ public class UIScopeImplTest {
     public void testVaadinBeanStoreRetrievalStrategyUIStoreInstance() {
         beanStoreTest(new BeanStoreRetrievalStrategyTest() {
             @Override
-            public void test(VaadinSession session, UIStore uiStore, UIID uiid) {
+            public void test(VaadinSession session, UIStore uiStore,
+                    UIID uiid) {
 
                 VaadinSessionBeanStoreRetrievalStrategy vaadinBSRS = new VaadinSessionBeanStoreRetrievalStrategy();
 
                 // Make sure that UIStore is always the same instance
-                assertSame(vaadinBSRS.getBeanStore(), vaadinBSRS.getBeanStore());
+                assertSame(vaadinBSRS.getBeanStore(),
+                        vaadinBSRS.getBeanStore());
             }
         });
     }
@@ -224,13 +227,14 @@ public class UIScopeImplTest {
     public void testVaadinBeanStoreRetrievalStrategyGetConversationId() {
         beanStoreTest(new BeanStoreRetrievalStrategyTest() {
             @Override
-            public void test(VaadinSession session, UIStore uiStore, UIID uiid) {
+            public void test(VaadinSession session, UIStore uiStore,
+                    UIID uiid) {
                 VaadinSessionBeanStoreRetrievalStrategy vaadinBSRS = new VaadinSessionBeanStoreRetrievalStrategy();
 
-                assertTrue(vaadinBSRS.getConversationId().contains(
-                        TEST_SESSION_ID));
-                assertTrue(vaadinBSRS.getConversationId().contains(
-                        String.valueOf(TEST_UIID)));
+                assertTrue(vaadinBSRS.getConversationId()
+                        .contains(TEST_SESSION_ID));
+                assertTrue(vaadinBSRS.getConversationId()
+                        .contains(String.valueOf(TEST_UIID)));
             }
         });
     }

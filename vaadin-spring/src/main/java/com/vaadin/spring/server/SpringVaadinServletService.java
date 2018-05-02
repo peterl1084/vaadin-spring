@@ -64,7 +64,8 @@ public class SpringVaadinServletService extends VaadinServletService {
                 if (handlers.get(i) instanceof ServletBootstrapHandler) {
                     handlers.set(i, new ServletBootstrapHandler() {
                         @Override
-                        protected String getServiceUrl(BootstrapContext context) {
+                        protected String getServiceUrl(
+                                BootstrapContext context) {
                             return context.getRequest().getContextPath()
                                     + serviceUrl;
                         }

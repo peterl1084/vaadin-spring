@@ -237,22 +237,28 @@ public class SpringNavigator extends Navigator {
      */
     @Override
     public void setErrorView(final Class<? extends View> viewClass) {
-        if(viewClass == null) {
+        if (viewClass == null) {
             setErrorProvider(null);
             return;
         }
-        String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, viewClass);
+        String[] beanNames = BeanFactoryUtils
+                .beanNamesForTypeIncludingAncestors(applicationContext,
+                        viewClass);
         /*
-            Beans count==0 here means fallback into direct class instantiation
-            No need to check for the scope then
-        */
+         * Beans count==0 here means fallback into direct class instantiation No
+         * need to check for the scope then
+         */
         if (beanNames.length > 1) {
             throw new NoUniqueBeanDefinitionException(viewClass);
         } else if (beanNames.length == 1) {
-            BeanDefinition beanDefinition = viewProvider.getBeanDefinitionRegistry().getBeanDefinition(beanNames[0]);
+            BeanDefinition beanDefinition = viewProvider
+                    .getBeanDefinitionRegistry()
+                    .getBeanDefinition(beanNames[0]);
             String scope = beanDefinition.getScope();
-            if (!UIScopeImpl.VAADIN_UI_SCOPE_NAME.equals(scope) && ! "prototype".equals(scope)) {
-                throw new BeanDefinitionValidationException("Error view must have UI or prototype scope");
+            if (!UIScopeImpl.VAADIN_UI_SCOPE_NAME.equals(scope)
+                    && !"prototype".equals(scope)) {
+                throw new BeanDefinitionValidationException(
+                        "Error view must have UI or prototype scope");
             }
         }
 

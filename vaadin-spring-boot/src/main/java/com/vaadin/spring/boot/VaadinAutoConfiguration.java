@@ -69,24 +69,24 @@ public class VaadinAutoConfiguration {
         }
     }
 
-	@Configuration
-	@ConditionalOnClass(name = "com.vaadin.spring.navigator.SpringNavigator")
-	static class EnableSpringVaadinNavigatorConfiguration
-			implements InitializingBean {
+    @Configuration
+    @ConditionalOnClass(name = "com.vaadin.spring.navigator.SpringNavigator")
+    static class EnableSpringVaadinNavigatorConfiguration
+            implements InitializingBean {
 
-		@ConditionalOnMissingBean(type = "com.vaadin.spring.navigator.SpringNavigator")
-		@Bean
-		@UIScope
-		public SpringNavigator vaadinNavigator() {
-			return new SpringNavigator();
-		}
+        @ConditionalOnMissingBean(type = "com.vaadin.spring.navigator.SpringNavigator")
+        @Bean
+        @UIScope
+        public SpringNavigator vaadinNavigator() {
+            return new SpringNavigator();
+        }
 
-		@Override
-		public void afterPropertiesSet() throws Exception {
-			logger.debug("{} initialized", getClass().getName());
-		}
+        @Override
+        public void afterPropertiesSet() throws Exception {
+            logger.debug("{} initialized", getClass().getName());
+        }
 
-	}
+    }
 
     @Configuration
     @EnableVaadinServlet

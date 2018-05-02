@@ -99,19 +99,19 @@ public class VaadinSessionScope implements Scope, BeanFactoryPostProcessor {
     @Override
     public void postProcessBeanFactory(
             ConfigurableListableBeanFactory configurableListableBeanFactory)
-                    throws BeansException {
+            throws BeansException {
         LOGGER.debug("Registering VaadinSession scope with bean factory [{}]",
                 configurableListableBeanFactory);
-        configurableListableBeanFactory.registerScope(
-                VAADIN_SESSION_SCOPE_NAME, this);
+        configurableListableBeanFactory.registerScope(VAADIN_SESSION_SCOPE_NAME,
+                this);
     }
 
     /**
      * Implementation of {@link BeanStoreRetrievalStrategy} that stores the
      * {@link BeanStore} in the current {@link com.vaadin.server.VaadinSession}.
      */
-    public static class VaadinSessionBeanStoreRetrievalStrategy implements
-    BeanStoreRetrievalStrategy {
+    public static class VaadinSessionBeanStoreRetrievalStrategy
+            implements BeanStoreRetrievalStrategy {
 
         private VaadinSession getVaadinSession() {
             VaadinSession current = VaadinSession.getCurrent();

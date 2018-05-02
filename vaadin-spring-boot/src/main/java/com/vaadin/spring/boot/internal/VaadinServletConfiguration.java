@@ -119,12 +119,12 @@ public class VaadinServletConfiguration implements InitializingBean {
         final String[] uiBeanNames = applicationContext
                 .getBeanNamesForAnnotation(SpringUI.class);
         for (String uiBeanName : uiBeanNames) {
-            SpringUI annotation = applicationContext.findAnnotationOnBean(
-                    uiBeanName, SpringUI.class);
+            SpringUI annotation = applicationContext
+                    .findAnnotationOnBean(uiBeanName, SpringUI.class);
             uiMappings.add(this.applicationContext.getEnvironment()
                     .resolvePlaceholders(annotation.path())
                     .replaceFirst("^/", ""));
-        } 
+        }
         return uiMappings;
     }
 

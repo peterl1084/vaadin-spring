@@ -79,15 +79,13 @@ public class SpringErrorViewTest extends AbstractSpringUIProviderTest {
 
         @Bean
         @UIScope
-        public TestErrorViewScopeUI errorViewScopeUI()
-        {
+        public TestErrorViewScopeUI errorViewScopeUI() {
             return new TestErrorViewScopeUI();
         }
 
         @Bean
         @ViewScope
-        public TestErrorViewScopeView errorViewScopeView()
-        {
+        public TestErrorViewScopeView errorViewScopeView() {
             return new TestErrorViewScopeView();
         }
     }

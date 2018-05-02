@@ -39,8 +39,8 @@ import org.springframework.core.type.StandardMethodMetadata;
 import java.util.Map;
 
 /**
- * Bean post processor that scans for {@link SpringViewDisplay} annotations on UI
- * scoped beans or bean classes and registers
+ * Bean post processor that scans for {@link SpringViewDisplay} annotations on
+ * UI scoped beans or bean classes and registers
  * {@link SpringViewDisplayRegistrationBean} instances for them for
  * {@link SpringUIProvider}.
  *
@@ -72,7 +72,8 @@ public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
                 StandardMethodMetadata metadata = (StandardMethodMetadata) beanDefinition
                         .getSource();
                 Map<String, Object> annotationAttributes = metadata
-                        .getAnnotationAttributes(SpringViewDisplay.class.getName());
+                        .getAnnotationAttributes(
+                                SpringViewDisplay.class.getName());
                 if (annotationAttributes != null) {
                     registerSpringViewDisplayBean(beanName);
                 }
@@ -89,19 +90,22 @@ public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
      * Create a view display registration bean definition to allow accessing
      * annotated view displays for the current UI scope.
      *
-     * @param clazz bean class having the view display annotation, not null
+     * @param clazz
+     *            bean class having the view display annotation, not null
      */
     protected void registerSpringViewDisplayBean(Class<?> clazz) {
         BeanDefinitionRegistry registry = null;
         if (applicationContext instanceof BeanDefinitionRegistry) {
             registry = (BeanDefinitionRegistry) applicationContext;
         } else if (applicationContext instanceof ConfigurableApplicationContext) {
-            ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
+            ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext)
+                    .getBeanFactory();
             if (beanFactory instanceof BeanDefinitionRegistry)
                 registry = (BeanDefinitionRegistry) beanFactory;
         }
         if (registry == null) {
-            throw new BeanDefinitionStoreException("BeanDefinitionRegistry is not accessible");
+            throw new BeanDefinitionStoreException(
+                    "BeanDefinitionRegistry is not accessible");
         }
 
         BeanDefinitionBuilder builder = BeanDefinitionBuilder
@@ -123,8 +127,8 @@ public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
      * Create a view display registration bean definition to allow accessing
      * annotated view displays for the current UI scope.
      *
-     * @param beanName name of the bean having the view display annotation, not
-     *                 null
+     * @param beanName
+     *            name of the bean having the view display annotation, not null
      */
     protected void registerSpringViewDisplayBean(String beanName) {
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) applicationContext;

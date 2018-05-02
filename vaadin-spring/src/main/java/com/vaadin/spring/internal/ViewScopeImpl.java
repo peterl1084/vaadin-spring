@@ -49,9 +49,8 @@ public class ViewScopeImpl implements Scope, BeanFactoryPostProcessor {
     private ConfigurableListableBeanFactory beanFactory;
 
     /**
-     * Sets the
-     * {@link com.vaadin.spring.internal.ViewCacheRetrievalStrategy}
-     * to use.
+     * Sets the {@link com.vaadin.spring.internal.ViewCacheRetrievalStrategy} to
+     * use.
      */
     public static synchronized void setViewCacheRetrievalStrategy(
             ViewCacheRetrievalStrategy viewCacheRetrievalStrategy) {
@@ -62,8 +61,7 @@ public class ViewScopeImpl implements Scope, BeanFactoryPostProcessor {
     }
 
     /**
-     * Returns the
-     * {@link com.vaadin.spring.internal.ViewCacheRetrievalStrategy}
+     * Returns the {@link com.vaadin.spring.internal.ViewCacheRetrievalStrategy}
      * to use. By default,
      * {@link com.vaadin.spring.internal.ViewScopeImpl.BeanFactoryContextViewCacheRetrievalStrategy}
      * is used.
@@ -74,8 +72,8 @@ public class ViewScopeImpl implements Scope, BeanFactoryPostProcessor {
 
     @Override
     public Object get(String name, ObjectFactory<?> objectFactory) {
-        return getViewCache().getCurrentViewBeanStore()
-                .get(name, objectFactory);
+        return getViewCache().getCurrentViewBeanStore().get(name,
+                objectFactory);
     }
 
     @Override
@@ -85,8 +83,8 @@ public class ViewScopeImpl implements Scope, BeanFactoryPostProcessor {
 
     @Override
     public void registerDestructionCallback(String name, Runnable callback) {
-        getViewCache().getCurrentViewBeanStore().registerDestructionCallback(
-                name, callback);
+        getViewCache().getCurrentViewBeanStore()
+                .registerDestructionCallback(name, callback);
     }
 
     @Override
@@ -120,12 +118,12 @@ public class ViewScopeImpl implements Scope, BeanFactoryPostProcessor {
 
     /**
      * Implementation of
-     * {@link com.vaadin.spring.internal.ViewCacheRetrievalStrategy}
-     * that fetches the {@link com.vaadin.spring.internal.ViewCache}
-     * instance from the provided bean factory.
+     * {@link com.vaadin.spring.internal.ViewCacheRetrievalStrategy} that
+     * fetches the {@link com.vaadin.spring.internal.ViewCache} instance from
+     * the provided bean factory.
      */
-    public static class BeanFactoryContextViewCacheRetrievalStrategy implements
-    ViewCacheRetrievalStrategy {
+    public static class BeanFactoryContextViewCacheRetrievalStrategy
+            implements ViewCacheRetrievalStrategy {
 
         @Override
         public ViewCache getViewCache(BeanFactory beanFactory) {

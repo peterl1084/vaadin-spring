@@ -73,7 +73,8 @@ public class SpringUIProviderTestWithUiImplementingViewDisplayAsSpringViewDispla
     @Test
     public void testFindSpringViewDisplay() throws Exception {
         TestUI ui = createUi(TestUI.class);
-        Assert.isInstanceOf(TestUI.class, getUiProvider().findSpringViewDisplay(ui),
+        Assert.isInstanceOf(TestUI.class,
+                getUiProvider().findSpringViewDisplay(ui),
                 "View display is not a TestUI");
     }
 

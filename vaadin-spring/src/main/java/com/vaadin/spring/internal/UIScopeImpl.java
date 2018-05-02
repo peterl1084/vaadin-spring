@@ -119,8 +119,8 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
      * Implementation of {@link BeanStoreRetrievalStrategy} that stores the
      * {@link BeanStore} in the current {@link com.vaadin.server.VaadinSession}.
      */
-    public static class VaadinSessionBeanStoreRetrievalStrategy implements
-            BeanStoreRetrievalStrategy {
+    public static class VaadinSessionBeanStoreRetrievalStrategy
+            implements BeanStoreRetrievalStrategy {
 
         private VaadinSession getVaadinSession() {
             VaadinSession current = VaadinSession.getCurrent();
@@ -155,10 +155,8 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
                 return new UIID(currentUI);
             } else {
                 UIID currentIdentifier = CurrentInstance.get(UIID.class);
-                Assert.notNull(
-                        currentIdentifier,
-                        String.format("Found no valid %s instance!",
-                                UIID.class.getName()));
+                Assert.notNull(currentIdentifier, String.format(
+                        "Found no valid %s instance!", UIID.class.getName()));
                 return currentIdentifier;
             }
         }
@@ -209,7 +207,8 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
                             private static final long serialVersionUID = 2829542503960939412L;
 
                             @Override
-                            public void beanStoreDestroyed(BeanStore beanStore) {
+                            public void beanStoreDestroyed(
+                                    BeanStore beanStore) {
                                 removeBeanStore(uiid);
                             }
 
@@ -259,13 +258,14 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
 
         @Override
         public String toString() {
-            return String.format("%s[id=%x, sessionId=%s]", getClass()
-                    .getSimpleName(), System.identityHashCode(this), sessionId);
+            return String.format("%s[id=%x, sessionId=%s]",
+                    getClass().getSimpleName(), System.identityHashCode(this),
+                    sessionId);
         }
     }
 
-    static class UIBeanStore extends SessionLockingBeanStore implements
-            ClientConnector.DetachListener {
+    static class UIBeanStore extends SessionLockingBeanStore
+            implements ClientConnector.DetachListener {
 
         private static final long serialVersionUID = 8775528615443492292L;
 
