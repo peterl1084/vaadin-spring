@@ -17,7 +17,6 @@ package com.vaadin.spring.internal;
 
 import java.util.Collection;
 
-import com.vaadin.spring.annotation.SpringViewDisplay;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,6 +36,7 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.spring.navigator.SpringNavigator;

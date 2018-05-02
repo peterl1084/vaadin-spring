@@ -15,11 +15,11 @@
  */
 package com.vaadin.spring.annotation;
 
-import org.springframework.stereotype.Component;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import org.springframework.stereotype.Component;
 
 /**
  * Alias for {@link org.springframework.stereotype.Component} to prevent

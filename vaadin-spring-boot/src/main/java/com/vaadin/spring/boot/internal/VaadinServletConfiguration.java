@@ -58,7 +58,7 @@ import com.vaadin.spring.server.SpringVaadinServlet;
  * and path info on the fly as those produced by
  * {@link ServletForwardingController} are not what {@link VaadinServlet}
  * expects. See {@link SpringVaadinServlet} for more information on this.
- * 
+ *
  * @author Petter Holmström (petter@vaadin.com)
  * @author Henri Sara (hesara@vaadin.com)
  */
@@ -121,7 +121,7 @@ public class VaadinServletConfiguration implements InitializingBean {
         for (String uiBeanName : uiBeanNames) {
             SpringUI annotation = applicationContext
                     .findAnnotationOnBean(uiBeanName, SpringUI.class);
-            uiMappings.add(this.applicationContext.getEnvironment()
+            uiMappings.add(applicationContext.getEnvironment()
                     .resolvePlaceholders(annotation.path())
                     .replaceFirst("^/", ""));
         }
@@ -135,7 +135,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     /**
      * Forwarding controller that sends requests for the root page of Vaadin
      * servlets to the Vaadin servlet.
-     * 
+     *
      * @return forwarding controller
      */
     @Bean
@@ -151,7 +151,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     /**
      * Returns true if the Vaadin servlet is mapped to the context root, false
      * otherwise.
-     * 
+     *
      * @return true if the Vaadin servlet is mapped to the context root
      */
     protected boolean isMappedToRoot() {

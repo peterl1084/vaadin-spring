@@ -106,7 +106,7 @@ public class SpringVaadinServlet extends VaadinServlet {
      *         or null to use the default
      */
     public String getServiceUrlPath() {
-        return this.serviceUrlPath;
+        return serviceUrlPath;
     }
 
     /**
@@ -138,7 +138,7 @@ public class SpringVaadinServlet extends VaadinServlet {
     @Override
     protected VaadinServletRequest createVaadinRequest(
             HttpServletRequest request) {
-        if (this.serviceUrlPath != null) {
+        if (serviceUrlPath != null) {
             return new SpringVaadinServletRequest(request, getService(), true);
         } else {
             return new VaadinServletRequest(request, getService());

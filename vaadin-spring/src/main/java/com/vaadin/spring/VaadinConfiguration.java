@@ -70,8 +70,8 @@ public class VaadinConfiguration implements ApplicationContextAware,
     @Bean
     @UIScope
     SpringViewProvider viewProvider() {
-        return new SpringViewProvider(this.applicationContext,
-                this.beanDefinitionRegistry);
+        return new SpringViewProvider(applicationContext,
+                beanDefinitionRegistry);
     }
 
     @Bean
@@ -89,7 +89,7 @@ public class VaadinConfiguration implements ApplicationContextAware,
     @Override
     public void postProcessBeanDefinitionRegistry(
             BeanDefinitionRegistry registry) throws BeansException {
-        this.beanDefinitionRegistry = registry;
+        beanDefinitionRegistry = registry;
     }
 
     @Override

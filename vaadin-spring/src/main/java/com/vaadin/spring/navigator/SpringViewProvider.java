@@ -108,11 +108,11 @@ public class SpringViewProvider implements ViewProvider {
         }
 
         public String getViewName() {
-            return this.viewName;
+            return viewName;
         }
 
         public String getBeanName() {
-            return this.beanName;
+            return beanName;
         }
     }
 
@@ -198,7 +198,7 @@ public class SpringViewProvider implements ViewProvider {
      * @return the access denied view class, or {@code null} if not set.
      */
     public Class<? extends View> getAccessDeniedViewClass() {
-        return this.accessDeniedViewClass;
+        return accessDeniedViewClass;
     }
 
     /**
@@ -250,13 +250,13 @@ public class SpringViewProvider implements ViewProvider {
                 beanNames.add(beanName);
                 final String parentName = annotation.parentName();
                 if (parentName.isEmpty()) {
-                    this.rootViewNames.add(viewName);
+                    rootViewNames.add(viewName);
                 } else {
-                    Set<String> childViewNames = this.viewNameParentToViewNameChildsMap
+                    Set<String> childViewNames = viewNameParentToViewNameChildsMap
                             .get(parentName);
                     if (childViewNames == null) {
                         childViewNames = new ConcurrentSkipListSet<String>();
-                        this.viewNameParentToViewNameChildsMap.put(parentName,
+                        viewNameParentToViewNameChildsMap.put(parentName,
                                 childViewNames);
                     }
                     childViewNames.add(viewName);
@@ -266,9 +266,9 @@ public class SpringViewProvider implements ViewProvider {
                         throw new IllegalStateException("SpringView default ["
                                 + viewName
                                 + "] is not unique for UIs, already default "
-                                + this.defaultViewNames);
+                                + defaultViewNames);
                     }
-                    this.defaultViewNames.add(viewName);
+                    defaultViewNames.add(viewName);
                 }
                 count++;
             } else {
@@ -433,7 +433,7 @@ public class SpringViewProvider implements ViewProvider {
             return true;
         }
 
-        final Class<?> type = this.applicationContext.getType(beanName);
+        final Class<?> type = applicationContext.getType(beanName);
 
         Assert.isAssignable(View.class, type,
                 "bean did not implement View interface");
@@ -470,7 +470,7 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     private boolean isDefaultViewNameUniqueForUIs(String beanName) {
-        if (this.defaultViewNames.size() == 0) {
+        if (defaultViewNames.size() == 0) {
             return true;
         }
 
@@ -482,7 +482,7 @@ public class SpringViewProvider implements ViewProvider {
         }
 
         for (Class<? extends UI> beanNameUI : annotation.ui()) {
-            for (String defaultViewName : this.defaultViewNames) {
+            for (String defaultViewName : defaultViewNames) {
                 final SpringView defaultViewNameAnnotation = getWebApplicationContext()
                         .findAnnotationOnBean(beanName, SpringView.class);
 
@@ -605,12 +605,12 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     protected BeanDefinitionRegistry getBeanDefinitionRegistry() {
-        if (this.beanDefinitionRegistry == null) {
+        if (beanDefinitionRegistry == null) {
             AutowireCapableBeanFactory factory = getWebApplicationContext()
                     .getAutowireCapableBeanFactory();
-            this.beanDefinitionRegistry = (BeanDefinitionRegistry) factory;
+            beanDefinitionRegistry = (BeanDefinitionRegistry) factory;
         }
-        return this.beanDefinitionRegistry;
+        return beanDefinitionRegistry;
     }
 
     protected View getViewFromApplicationContextAndCheckAccess(
@@ -632,9 +632,8 @@ public class SpringViewProvider implements ViewProvider {
      *         no access denied view class is set
      */
     protected View getAccessDeniedView() {
-        if (this.accessDeniedViewClass != null) {
-            return getWebApplicationContext()
-                    .getBean(this.accessDeniedViewClass);
+        if (accessDeniedViewClass != null) {
+            return getWebApplicationContext().getBean(accessDeniedViewClass);
         } else {
             return null;
         }
@@ -674,7 +673,7 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     protected ApplicationContext getWebApplicationContext() {
-        if (this.applicationContext == null) {
+        if (applicationContext == null) {
             // Assume we have serialized and deserialized and Navigator is
             // trying to find a view so UI.getCurrent() is available
             UI ui = UI.getCurrent();
@@ -682,11 +681,11 @@ public class SpringViewProvider implements ViewProvider {
                 throw new IllegalStateException(
                         "Could not find application context and no current UI is available");
             }
-            this.applicationContext = ((SpringVaadinServletService) ui
-                    .getSession().getService()).getWebApplicationContext();
+            applicationContext = ((SpringVaadinServletService) ui.getSession()
+                    .getService()).getWebApplicationContext();
         }
 
-        return this.applicationContext;
+        return applicationContext;
     }
 
     /**
@@ -698,7 +697,7 @@ public class SpringViewProvider implements ViewProvider {
      * @return internal mapping from view names to correspoding bean names
      */
     protected Map<String, Set<String>> getViewNameToBeanNamesMap() {
-        return this.viewNameToBeanNamesMap;
+        return viewNameToBeanNamesMap;
     }
 
     public String getBeanNameOfViewName(String viewName) {
@@ -721,9 +720,8 @@ public class SpringViewProvider implements ViewProvider {
     public List<ViewInfo> getRootViews() {
         List<ViewInfo> rootViews = new ArrayList<ViewInfo>();
 
-        for (String rootViewName : this.rootViewNames) {
-            for (String beanName : this.viewNameToBeanNamesMap
-                    .get(rootViewName)) {
+        for (String rootViewName : rootViewNames) {
+            for (String beanName : viewNameToBeanNamesMap.get(rootViewName)) {
                 ViewInfo viewInfo = new ViewInfo(rootViewName, beanName);
                 if (isViewValidForCurrentUI(viewInfo)) {
                     rootViews.add(viewInfo);
@@ -731,7 +729,7 @@ public class SpringViewProvider implements ViewProvider {
             }
         }
 
-        rootViews.sort(this.orderComparator);
+        rootViews.sort(orderComparator);
 
         return rootViews;
     }
@@ -739,11 +737,11 @@ public class SpringViewProvider implements ViewProvider {
     public List<ViewInfo> getChildViews(String parentViewName) {
         List<ViewInfo> childViews = new ArrayList<ViewInfo>();
 
-        Set<String> viewNames = this.viewNameParentToViewNameChildsMap
+        Set<String> viewNames = viewNameParentToViewNameChildsMap
                 .get(parentViewName);
         if (viewNames != null) {
             for (String childViewName : viewNames) {
-                for (String beanName : this.viewNameToBeanNamesMap
+                for (String beanName : viewNameToBeanNamesMap
                         .get(childViewName)) {
                     ViewInfo viewInfo = new ViewInfo(childViewName, beanName);
                     if (isViewValidForCurrentUI(viewInfo)) {
@@ -753,7 +751,7 @@ public class SpringViewProvider implements ViewProvider {
             }
         }
 
-        childViews.sort(this.orderComparator);
+        childViews.sort(orderComparator);
 
         return childViews;
     }
@@ -771,7 +769,7 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     public String getParentViewName(String viewId) {
-        Iterator<Entry<String, Set<String>>> iterator = this.viewNameParentToViewNameChildsMap
+        Iterator<Entry<String, Set<String>>> iterator = viewNameParentToViewNameChildsMap
                 .entrySet().iterator();
         while (iterator.hasNext()) {
             Entry<String, Set<String>> parentEntry = iterator.next();
@@ -783,8 +781,8 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     public String getDefaultViewName() {
-        for (String viewName : this.defaultViewNames) {
-            for (String beanName : this.viewNameToBeanNamesMap.get(viewName)) {
+        for (String viewName : defaultViewNames) {
+            for (String beanName : viewNameToBeanNamesMap.get(viewName)) {
                 if (isViewValidForCurrentUI(new ViewInfo(viewName, beanName))) {
                     return viewName;
                 }

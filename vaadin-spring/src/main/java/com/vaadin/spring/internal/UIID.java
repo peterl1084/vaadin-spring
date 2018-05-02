@@ -15,11 +15,12 @@
  */
 package com.vaadin.spring.internal;
 
-import com.vaadin.server.UICreateEvent;
-import com.vaadin.ui.UI;
+import java.io.Serializable;
+
 import org.springframework.util.Assert;
 
-import java.io.Serializable;
+import com.vaadin.server.UICreateEvent;
+import com.vaadin.ui.UI;
 
 /**
  * Uniquely identifies a UI instance for a given window/tab inside a session.
@@ -35,13 +36,13 @@ public class UIID implements Serializable {
     private final int uiId;
 
     public UIID(UICreateEvent createEvent) {
-        this.uiId = createEvent.getUiId();
+        uiId = createEvent.getUiId();
     }
 
     public UIID(UI ui) {
         Assert.notNull(ui, "ui must not be null");
         Assert.isTrue(ui.getUIId() > -1, "UIId of ui must not be -1");
-        this.uiId = ui.getUIId();
+        uiId = ui.getUIId();
     }
 
     public UIID(int uiId) {
@@ -50,10 +51,12 @@ public class UIID implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
         final UIID that = (UIID) o;
 

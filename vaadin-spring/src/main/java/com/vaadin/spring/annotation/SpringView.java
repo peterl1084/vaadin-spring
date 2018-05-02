@@ -95,14 +95,14 @@ public @interface SpringView {
     /**
      * The name of the parent view if this module is a sub view. Default value
      * is "" when top level view.
-     * 
+     *
      * @return the parent view name
      */
     String parentName() default "";
 
     /**
      * The icon of the view.
-     * 
+     *
      * @return the icon of the view
      */
     FontAwesome icon() default FontAwesome.FILE;
@@ -110,21 +110,21 @@ public @interface SpringView {
     /**
      * The order number of the view. All views on the same level/parent will be
      * ordered ascending by this number. Default is -1 meaning unsorted
-     * 
+     *
      * @return the sorting number
      */
     public int order() default -1;
 
     /**
-     * 
-     * 
+     *
+     *
      * @return is default screen
      */
     public boolean isDefault() default false;
 
     /**
      * The capabilityKey used for securing the view
-     * 
+     *
      * @return capabilityKey, default ""
      */
     public String capabilityKey() default "";

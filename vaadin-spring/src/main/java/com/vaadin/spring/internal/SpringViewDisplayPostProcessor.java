@@ -15,10 +15,8 @@
  */
 package com.vaadin.spring.internal;
 
-import com.vaadin.navigator.ViewDisplay;
-import com.vaadin.spring.annotation.SpringViewDisplay;
-import com.vaadin.spring.server.SpringUIProvider;
-import com.vaadin.ui.Component;
+import java.util.Map;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
@@ -36,7 +34,10 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.StandardMethodMetadata;
 
-import java.util.Map;
+import com.vaadin.navigator.ViewDisplay;
+import com.vaadin.spring.annotation.SpringViewDisplay;
+import com.vaadin.spring.server.SpringUIProvider;
+import com.vaadin.ui.Component;
 
 /**
  * Bean post processor that scans for {@link SpringViewDisplay} annotations on
@@ -100,8 +101,9 @@ public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
         } else if (applicationContext instanceof ConfigurableApplicationContext) {
             ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext)
                     .getBeanFactory();
-            if (beanFactory instanceof BeanDefinitionRegistry)
+            if (beanFactory instanceof BeanDefinitionRegistry) {
                 registry = (BeanDefinitionRegistry) beanFactory;
+            }
         }
         if (registry == null) {
             throw new BeanDefinitionStoreException(

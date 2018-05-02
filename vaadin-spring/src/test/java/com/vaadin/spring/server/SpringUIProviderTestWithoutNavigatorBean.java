@@ -15,7 +15,6 @@
  */
 package com.vaadin.spring.server;
 
-import com.vaadin.spring.annotation.SpringViewDisplay;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +23,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.Assert;
 
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.SpringViewDisplay;
 
 @ContextConfiguration
 @WebAppConfiguration
